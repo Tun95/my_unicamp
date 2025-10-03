@@ -142,7 +142,7 @@ class CourseService {
     }
   }
 
-  // Create new course
+  // Create new course with duplicate check
   async createCourse(courseData) {
     try {
       // Check for existing active course with same title, university, and degree type
@@ -154,7 +154,7 @@ class CourseService {
       });
 
       if (existingCourse) {
-        throw new Error("course already exists");
+        throw new Error("COURSE_ALREADY_EXISTS");
       }
 
       const course = new Course(courseData);

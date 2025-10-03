@@ -17,6 +17,7 @@ const ERROR_MESSAGES = {
   // Course related messages
   COURSE_NOT_FOUND: "Course not found",
   COURSE_NOT_AVAILABLE: "Course not available",
+  COURSE_ALREADY_EXISTS: "Course already exists",
 
   // Validation messages
   VALIDATION_ERROR: "Validation failed",
