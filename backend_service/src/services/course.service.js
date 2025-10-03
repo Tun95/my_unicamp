@@ -142,9 +142,21 @@ class CourseService {
     }
   }
 
-  // Create new course (for admin panel - bonus feature)
+  // Create new course
   async createCourse(courseData) {
     try {
+      // Check for existing active course with same title, university, and degree type
+      const existingCourse = await Course.findOne({
+        title: courseData.title,
+        university: courseData.university,
+        degree_type: courseData.degree_type,
+        is_active: true,
+      });
+
+      if (existingCourse) {
+        throw new Error("course already exists");
+      }
+
       const course = new Course(courseData);
       await course.save();
 
@@ -164,9 +176,29 @@ class CourseService {
     }
   }
 
-  // Update course (for admin panel - bonus feature)
+  // Update course with duplicate check (excluding current course)
   async updateCourse(courseId, updateData) {
     try {
+      // If updating title, university, or degree_type, check for duplicates
+      if (updateData.title || updateData.university || updateData.degree_type) {
+        const currentCourse = await Course.findById(courseId);
+        if (!currentCourse) {
+          throw new Error("COURSE_NOT_FOUND");
+        }
+
+        const duplicateCourse = await Course.findOne({
+          _id: { $ne: courseId }, // Exclude current course
+          title: updateData.title || currentCourse.title,
+          university: updateData.university || currentCourse.university,
+          degree_type: updateData.degree_type || currentCourse.degree_type,
+          is_active: true,
+        });
+
+        if (duplicateCourse) {
+          throw new Error("COURSE_ALREADY_EXISTS");
+        }
+      }
+
       const course = await Course.findByIdAndUpdate(courseId, updateData, {
         new: true,
         runValidators: true,
@@ -187,6 +219,62 @@ class CourseService {
       await logger.error(error, {
         service: "CourseService",
         method: "updateCourse",
+        course_id: courseId,
+      });
+      throw error;
+    }
+  }
+
+  // Delete course (soft delete)
+  async deleteCourse(courseId) {
+    try {
+      const course = await Course.findByIdAndUpdate(
+        courseId,
+        { is_active: false },
+        { new: true }
+      );
+
+      if (!course) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      await logger.info("Course deleted successfully", {
+        service: "CourseService",
+        method: "deleteCourse",
+        course_id: courseId,
+      });
+
+      return course;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "deleteCourse",
+        course_id: courseId,
+      });
+      throw error;
+    }
+  }
+
+  // Permanent delete course
+  async permanentDeleteCourse(courseId) {
+    try {
+      const course = await Course.findByIdAndDelete(courseId);
+
+      if (!course) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      await logger.info("Course permanently deleted", {
+        service: "CourseService",
+        method: "permanentDeleteCourse",
+        course_id: courseId,
+      });
+
+      return course;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "permanentDeleteCourse",
         course_id: courseId,
       });
       throw error;

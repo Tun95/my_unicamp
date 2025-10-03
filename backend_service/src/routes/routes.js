@@ -19,7 +19,12 @@ setupRoutes = (server) => {
   server
     .route("/api/courses/:id")
     .get(idValidation, courseController.getCourseById)
-    .put(idValidation, updateCourseValidation, courseController.updateCourse);
+    .put(idValidation, updateCourseValidation, courseController.updateCourse)
+    .delete(idValidation, courseController.deleteCourse);
+
+  server
+    .route("/api/courses/:id/permanent")
+    .delete(idValidation, courseController.permanentDeleteCourse);
 
   server.get("/health", async (req, res) => {
     res.status(200).json({ status: HEALTH_STATUS.UP });

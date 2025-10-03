@@ -41,7 +41,7 @@ class CourseController {
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
-        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -79,7 +79,7 @@ class CourseController {
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
-        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -101,12 +101,12 @@ class CourseController {
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
-        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  // Create new course (bonus feature - admin)
+  // Create new course
   async createCourse(req, res) {
     try {
       const courseData = req.body;
@@ -133,12 +133,12 @@ class CourseController {
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
-        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  // Update course (bonus feature - admin)
+  // Update course
   async updateCourse(req, res) {
     try {
       const { id } = req.params;
@@ -167,7 +167,71 @@ class CourseController {
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
-        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Delete course (soft delete)
+  async deleteCourse(req, res) {
+    try {
+      const { id } = req.params;
+      const course = await courseService.deleteCourse(id);
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        message: "Course deleted successfully",
+        data: course,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "deleteCourse",
+        course_id: req.params.id,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Permanent delete course
+  async permanentDeleteCourse(req, res) {
+    try {
+      const { id } = req.params;
+      const course = await courseService.permanentDeleteCourse(id);
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        message: "Course permanently deleted",
+        data: course,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "permanentDeleteCourse",
+        course_id: req.params.id,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }

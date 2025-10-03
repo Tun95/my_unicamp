@@ -25,7 +25,7 @@ const validateObjectId = (paramName) => [
 // ID Validation
 const idValidation = validateObjectId("id");
 
-// Get courses validation - FIXED VERSION
+// Get courses validation
 const getCoursesValidation = [
   query("page")
     .optional()
@@ -55,10 +55,29 @@ const getCoursesValidation = [
     .optional()
     .isString()
     .trim()
-    .isIn(["Bachelor", "Master", "PhD", "Diploma", "Certificate"])
-    .withMessage(
-      "Invalid degree type. Must be: Bachelor, Master, PhD, Diploma, or Certificate"
-    ),
+    .custom((value) => {
+      const validTypes = [
+        "bachelor",
+        "master",
+        "phd",
+        "diploma",
+        "certificate",
+      ];
+      if (!validTypes.includes(value.toLowerCase())) {
+        throw new Error(
+          `Invalid degree type. Must be: ${validTypes.join(", ")}`
+        );
+      }
+      return true;
+    })
+    .withMessage("Invalid degree type")
+    .customSanitizer((value) => {
+      // Convert to proper case for consistency
+      if (value) {
+        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      }
+      return value;
+    }),
   query("field_of_study")
     .optional()
     .isString()

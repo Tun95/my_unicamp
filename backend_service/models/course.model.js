@@ -1,4 +1,4 @@
-// backend_service/models/course.model.js - Course model definition
+// backend_service/models/course.model.js
 const mongoose = require("mongoose");
 
 const courseSchema = new mongoose.Schema(
@@ -109,7 +109,20 @@ const courseSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for search and filtering
+// Compound unique index to prevent duplicates
+courseSchema.index(
+  {
+    title: 1,
+    university: 1,
+    degree_type: 1,
+  },
+  {
+    unique: true,
+    partialFilterExpression: { is_active: true }, // Only enforce uniqueness for active courses
+  }
+);
+
+// Text index for search functionality
 courseSchema.index({
   title: "text",
   university: "text",
