@@ -5,6 +5,7 @@ const {
   getCoursesValidation,
   createCourseValidation,
   updateCourseValidation,
+  toggleCourseVisibilityValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -20,7 +21,11 @@ setupRoutes = (server) => {
     .route("/api/courses/:id")
     .get(idValidation, courseController.getCourseById)
     .put(idValidation, updateCourseValidation, courseController.updateCourse)
-    .delete(idValidation, courseController.deleteCourse);
+    .patch(
+      idValidation,
+      toggleCourseVisibilityValidation,
+      courseController.toggleCourseVisibility
+    );
 
   server
     .route("/api/courses/:id/permanent")

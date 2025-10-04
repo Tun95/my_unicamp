@@ -225,31 +225,62 @@ class CourseService {
     }
   }
 
-  // Delete course (soft delete)
-  async deleteCourse(courseId) {
+  // Toggle course visibility (hide/unhide)
+  async toggleCourseVisibility(courseId, action) {
     try {
-      const course = await Course.findByIdAndUpdate(
-        courseId,
-        { is_active: false },
-        { new: true }
-      );
-
+      const course = await Course.findById(courseId);
       if (!course) {
         throw new Error("COURSE_NOT_FOUND");
       }
 
-      await logger.info("Course deleted successfully", {
+      let newVisibility;
+
+      // Determine new visibility state based on action parameter
+      if (action === "hide") {
+        newVisibility = false;
+      } else if (action === "unhide") {
+        newVisibility = true;
+      } else {
+        // Toggle if no specific action provided
+        newVisibility = !course.is_active;
+      }
+
+      // If unhiding, check for potential duplicates
+      if (newVisibility === true) {
+        const duplicateCourse = await this.findDuplicateCourse(
+          {
+            title: course.title,
+            university: course.university,
+            degree_type: course.degree_type,
+          },
+          courseId
+        );
+
+        if (duplicateCourse) {
+          throw new Error("DUPLICATE_COURSE_ACTIVE");
+        }
+      }
+
+      // Update the course visibility
+      course.is_active = newVisibility;
+      await course.save();
+
+      const actionText = newVisibility ? "unhidden" : "hidden";
+      await logger.info(`Course ${actionText} successfully`, {
         service: "CourseService",
-        method: "deleteCourse",
+        method: "toggleCourseVisibility",
         course_id: courseId,
+        previous_state: !newVisibility,
+        new_state: newVisibility,
       });
 
       return course;
     } catch (error) {
       await logger.error(error, {
         service: "CourseService",
-        method: "deleteCourse",
+        method: "toggleCourseVisibility",
         course_id: courseId,
+        action: action,
       });
       throw error;
     }

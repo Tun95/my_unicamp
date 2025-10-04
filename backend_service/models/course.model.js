@@ -118,7 +118,7 @@ courseSchema.index(
   },
   {
     unique: true,
-    partialFilterExpression: { is_active: true }, // Only enforce uniqueness for active courses
+    partialFilterExpression: { is_active: true },
   }
 );
 

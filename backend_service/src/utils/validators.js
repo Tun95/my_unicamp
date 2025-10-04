@@ -270,10 +270,24 @@ const updateCourseValidation = [
   handleValidationErrors,
 ];
 
+// Toggle course visibility validation
+const toggleCourseVisibilityValidation = [
+  body("action")
+    .optional()
+    .isString()
+    .trim()
+    .isIn(["hide", "unhide"])
+    .withMessage("Action must be either 'hide' or 'unhide'")
+    .toLowerCase(),
+
+  handleValidationErrors,
+];
+
 module.exports = {
   idValidation,
   getCoursesValidation,
   createCourseValidation,
   updateCourseValidation,
+  toggleCourseVisibilityValidation,
   handleValidationErrors,
 };

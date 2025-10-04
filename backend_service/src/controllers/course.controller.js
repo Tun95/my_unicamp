@@ -172,28 +172,43 @@ class CourseController {
     }
   }
 
-  // Delete course (soft delete)
-  async deleteCourse(req, res) {
+  // Toggle course visibility (hide/unhide)
+  async toggleCourseVisibility(req, res) {
     try {
       const { id } = req.params;
-      const course = await courseService.deleteCourse(id);
+      const { action } = req.body;
+
+      const course = await courseService.toggleCourseVisibility(id, action);
+
+      const message = course.is_active
+        ? "Course unhidden successfully"
+        : "Course hidden successfully";
 
       return sendResponse(res, 200, {
         status: STATUS.SUCCESS,
-        message: "Course deleted successfully",
+        message: message,
         data: course,
       });
     } catch (error) {
       await logger.error(error, {
         controller: "CourseController",
-        method: "deleteCourse",
+        method: "toggleCourseVisibility",
         course_id: req.params.id,
+        action: req.body?.action,
       });
 
       if (error.message === "COURSE_NOT_FOUND") {
         return sendResponse(res, 404, {
           status: STATUS.FAILED,
           message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      if (error.message === "DUPLICATE_COURSE_ACTIVE") {
+        return sendResponse(res, 409, {
+          status: STATUS.FAILED,
+          message:
+            "Cannot unhide course: An active course with the same title, university, and degree type already exists",
         });
       }
 
