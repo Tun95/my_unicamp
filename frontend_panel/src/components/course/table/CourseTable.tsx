@@ -11,7 +11,8 @@ interface TableComponentProps {
   courses: Course[];
   currentPage: number;
   onPageChange: (page: number) => void;
-  loading?: boolean;
+  fetchCourses?: (page?: number) => Promise<void>;
+  loading: boolean;
   onCourseUpdate?: (course: Course) => void;
   totalPages?: number;
 }
@@ -20,7 +21,8 @@ function TableComponent({
   courses,
   currentPage,
   onPageChange,
-  loading = false,
+  fetchCourses,
+  loading,
   onCourseUpdate,
   totalPages = 1,
 }: TableComponentProps) {
@@ -38,6 +40,9 @@ function TableComponent({
   const handleCourseUpdate = (updatedCourse: Course) => {
     if (onCourseUpdate) {
       onCourseUpdate(updatedCourse);
+      if (fetchCourses) {
+        fetchCourses(currentPage);
+      }
     }
     setSelectedCourse(null);
   };
@@ -95,11 +100,18 @@ function TableComponent({
                   </tr>
                 </thead>
                 <tbody>
-                  {courses.map((course) => (
-                    <tr
-                      key={course._id}
-                      className={`border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:${
-                        theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                  {courses.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-4 text-sm text-gray-600 dark:text-gray-300 text-center">
+                        No courses found.
+                      </td>
+                    </tr>
+                  ) : (
+                    courses.map((course) => (
+                      <tr
+                        key={course._id}
+                        className={`border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:${
+                          theme === "dark" ? "bg-gray-700" : "bg-gray-50"
                       }`}
                       onClick={() => handleRowClick(course)}
                     >
@@ -145,7 +157,7 @@ function TableComponent({
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>
@@ -238,6 +250,9 @@ function TableComponent({
       {selectedCourse && (
         <CourseDetailSidebar
           course={selectedCourse}
+          currentPage={currentPage}
+          fetchCourses={fetchCourses}
+          loading={false}
           onClose={handleCloseSidebar}
           onCourseUpdate={handleCourseUpdate}
         />

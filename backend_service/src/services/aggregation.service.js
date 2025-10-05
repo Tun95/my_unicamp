@@ -241,7 +241,7 @@ class AggregationService {
         .sort({ createdAt: -1 })
         .limit(5)
         .select(
-          "title university degree_type field_of_study createdAt duration fees is_active"
+          "title university degree_type field_of_study createdAt duration fees is_active location tuition_fee description"
         )
         .lean();
 

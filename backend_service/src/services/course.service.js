@@ -52,7 +52,7 @@ class CourseService {
         )
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .sort({ university: 1, title: 1 });
+        .sort({ createdAt: -1 }); // Sort by creation date
 
       const total = await Course.countDocuments(query);
 
@@ -165,7 +165,7 @@ class CourseService {
         .select("-__v") // Include all fields for admin, only exclude version key
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .sort({ is_active: -1, createdAt: -1, university: 1 }); // Active first, then by creation date
+        .sort({ createdAt: -1 }); // Sort by creation date
 
       const total = await Course.countDocuments(query);
 

@@ -20,21 +20,21 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const data = await courseService.getDashboardOverview();
-        setDashboardData(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch dashboard data");
-        console.error("Error fetching dashboard data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const data = await courseService.getDashboardOverview();
+      setDashboardData(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch dashboard data");
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDashboardData();
   }, []);
 
@@ -174,8 +174,7 @@ function Dashboard() {
         <div className="mt-1">
           <TableComponent
             courses={recent_activity}
-            currentPage={1}
-            onPageChange={() => {}}
+            fetchDashboardData={fetchDashboardData}
             loading={loading}
           />
         </div>

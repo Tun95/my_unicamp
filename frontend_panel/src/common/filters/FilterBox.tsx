@@ -1,6 +1,9 @@
 // FilterBox.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../../custom hooks/Hooks";
+import { courseService } from "../../services/courseService";
+import { FilterOptions } from "../../types/course/course";
+import { Loader } from "lucide-react";
 
 interface FilterBoxProps {
   onSearchChange: (value: string) => void;
@@ -26,6 +29,31 @@ function FilterBox({
   const [fieldOfStudyValue, setFieldOfStudyValue] = useState("all");
   const [locationValue, setLocationValue] = useState("all");
   const [statusValue, setStatusValue] = useState("all");
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        setLoading(true);
+        const response = await courseService.getFilterOptions();
+        setFilterOptions(response.data);
+        setError(null);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch filter options";
+        setError(errorMessage);
+        console.error("Error fetching filter options:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -33,7 +61,7 @@ function FilterBox({
     onSearchChange(value);
   };
 
-  const handleUniversityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUniversityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setUniversityValue(value);
     onUniversityChange(value === "all" ? "" : value);
@@ -45,13 +73,15 @@ function FilterBox({
     onDegreeTypeChange(value === "all" ? "" : value);
   };
 
-  const handleFieldOfStudyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFieldOfStudyChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const value = e.target.value;
     setFieldOfStudyValue(value);
     onFieldOfStudyChange(value === "all" ? "" : value);
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setLocationValue(value);
     onLocationChange(value === "all" ? "" : value);
@@ -63,34 +93,36 @@ function FilterBox({
     onStatusChange(value === "all" ? "" : value);
   };
 
-  // Common universities, degree types, and fields of study for suggestions
-  const commonUniversities = [
-    "Carnegie Mellon University",
-    "Harvard Business School",
-    "MIT",
-    "Stanford University",
-    "University of Toronto",
-    "University of Oxford",
-  ];
+  if (loading) {
+    return (
+      <div
+        className={`mb-4 p-4 rounded-lg ${
+          theme === "dark" ? "bg-gray-800" : "bg-white border"
+        }`}
+      >
+        <div className="flex items-center justify-center py-4">
+          <Loader className="animate-spin text-gray-500 dark:text-gray-400 mr-2" />
+          <span className="text-gray-600 dark:text-gray-400">
+            Loading filters...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
-  const degreeTypes = ["Bachelor", "Master", "PhD", "Diploma", "Certificate"];
-
-  const commonFieldsOfStudy = [
-    "Computer Science",
-    "Business Administration",
-    "Data Science",
-    "Mechanical Engineering",
-    "Political Science",
-  ];
-
-  const commonLocations = [
-    "Pittsburgh, Pennsylvania, USA",
-    "Cambridge, Massachusetts, USA",
-    "Stanford, California, USA",
-    "Oxford, England, UK",
-    "Boston, Massachusetts, USA",
-    "Toronto, Ontario, Canada",
-  ];
+  if (error) {
+    return (
+      <div
+        className={`mb-4 p-4 rounded-lg ${
+          theme === "dark" ? "bg-gray-800" : "bg-white border"
+        }`}
+      >
+        <div className="text-red-600 dark:text-red-400 text-center">
+          Failed to load filters: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -118,19 +150,18 @@ function FilterBox({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             University
           </label>
-          <input
-            type="text"
-            placeholder="Filter by university..."
-            value={universityValue === "all" ? "" : universityValue}
+          <select
+            value={universityValue}
             onChange={handleUniversityChange}
-            list="universities"
-            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-          />
-          <datalist id="universities">
-            {commonUniversities.map((uni) => (
-              <option key={uni} value={uni} />
+            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">All Universities</option>
+            {filterOptions?.universities.map((uni) => (
+              <option key={uni} value={uni}>
+                {uni}
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
 
         {/* Degree Type Filter */}
@@ -144,7 +175,7 @@ function FilterBox({
             className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Degree Types</option>
-            {degreeTypes.map((type) => (
+            {filterOptions?.degree_types.map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
@@ -157,19 +188,18 @@ function FilterBox({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Field of Study
           </label>
-          <input
-            type="text"
-            placeholder="Filter by field of study..."
-            value={fieldOfStudyValue === "all" ? "" : fieldOfStudyValue}
+          <select
+            value={fieldOfStudyValue}
             onChange={handleFieldOfStudyChange}
-            list="fields"
-            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-          />
-          <datalist id="fields">
-            {commonFieldsOfStudy.map((field) => (
-              <option key={field} value={field} />
+            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">All Fields of Study</option>
+            {filterOptions?.fields_of_study.map((field) => (
+              <option key={field} value={field}>
+                {field}
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
 
         {/* Location Filter */}
@@ -177,19 +207,18 @@ function FilterBox({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Location
           </label>
-          <input
-            type="text"
-            placeholder="Filter by location..."
-            value={locationValue === "all" ? "" : locationValue}
+          <select
+            value={locationValue}
             onChange={handleLocationChange}
-            list="locations"
-            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-          />
-          <datalist id="locations">
-            {commonLocations.map((location) => (
-              <option key={location} value={location} />
+            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">All Locations</option>
+            {filterOptions?.locations.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
 
         {/* Status Filter */}
@@ -207,6 +236,29 @@ function FilterBox({
             <option value="inactive">Inactive</option>
           </select>
         </div>
+      </div>
+
+      {/* Clear Filters Button */}
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => {
+            setSearchValue("");
+            setUniversityValue("all");
+            setDegreeTypeValue("all");
+            setFieldOfStudyValue("all");
+            setLocationValue("all");
+            setStatusValue("all");
+            onSearchChange("");
+            onUniversityChange("");
+            onDegreeTypeChange("");
+            onFieldOfStudyChange("");
+            onLocationChange("");
+            onStatusChange("");
+          }}
+          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          Clear All Filters
+        </button>
       </div>
     </div>
   );

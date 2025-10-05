@@ -14,6 +14,7 @@ const dynamicCors = (req, res, next) => {
     "POST",
     "PUT",
     "DELETE",
+    "PATCH",
     "OPTIONS"
   );
 

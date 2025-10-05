@@ -86,16 +86,7 @@ export interface DashboardOverview {
       sample_courses: Array<{ title: string; university: string }>;
     }>;
   };
-  recent_activity: Array<{
-    _id: string;
-    title: string;
-    university: string;
-    degree_type: string;
-    field_of_study: string;
-    duration: string;
-    fees: string;
-    createdAt: string;
-  }>;
+  recent_activity: Course[];
   last_updated: string;
 }
 

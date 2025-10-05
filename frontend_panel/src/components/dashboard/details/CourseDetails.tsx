@@ -5,9 +5,15 @@ import { Course } from "../../../types/dashboard/dashboard";
 import { courseService } from "../../../services/courseService";
 import { useState } from "react";
 import { toast } from "sonner";
+import { getStatusColor } from "../../../utilities/status/status";
+import { formatDate } from "../../../utilities/utils/Utils";
 
 interface CourseDetailSidebarProps {
   course: Course;
+  currentPage?: number;
+  fetchCourses?: (page?: number) => Promise<void>;
+  fetchDashboardData?: () => Promise<void>;
+  loading?: boolean;
   onClose: () => void;
   onCourseUpdate?: (course: Course) => void;
 }
@@ -15,35 +21,15 @@ interface CourseDetailSidebarProps {
 function CourseDetailSidebar({
   course,
   onClose,
+  currentPage,
+  fetchCourses,
+  fetchDashboardData,
   onCourseUpdate,
 }: CourseDetailSidebarProps) {
   const { theme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editedCourse, setEditedCourse] = useState(course);
   const [loading, setLoading] = useState(false);
-
-  const getStatusColor = (degreeType: string) => {
-    switch (degreeType) {
-      case "Bachelor":
-        return "blue";
-      case "Master":
-        return "green";
-      case "PhD":
-        return "purple";
-      default:
-        return "gray";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -71,6 +57,12 @@ function CourseDetailSidebar({
         onCourseUpdate(updatedCourse);
       }
       setIsEditing(false);
+      if (fetchCourses) {
+        fetchCourses(currentPage);
+      }
+      if (fetchDashboardData) {
+        fetchDashboardData();
+      }
       toast.success("Course updated successfully!");
     } catch (error) {
       console.error("Error updating course:", error);
@@ -83,11 +75,22 @@ function CourseDetailSidebar({
   const handleToggleActive = async () => {
     try {
       setLoading(true);
+      // Determine the action based on current state
+      const action = course.is_active ? "hide" : "unhide";
+
       const updatedCourse = await courseService.toggleCourseVisibility(
-        course._id
+        course._id,
+        action
       );
+
       if (onCourseUpdate) {
         onCourseUpdate(updatedCourse);
+      }
+      if (fetchCourses) {
+        fetchCourses(currentPage);
+      }
+      if (fetchDashboardData) {
+        fetchDashboardData();
       }
       toast.success(
         `Course ${
@@ -114,6 +117,12 @@ function CourseDetailSidebar({
     try {
       setLoading(true);
       await courseService.deleteCourse(course._id);
+      if (fetchCourses) {
+        fetchCourses(currentPage);
+      }
+      if (fetchDashboardData) {
+        fetchDashboardData();
+      }
       toast.success("Course deleted successfully!");
       onClose();
     } catch (error) {

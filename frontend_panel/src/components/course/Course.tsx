@@ -169,6 +169,7 @@ function Course() {
           courses={courses}
           currentPage={currentPage}
           onPageChange={handlePageChange}
+          fetchCourses={fetchCourses}
           loading={loading}
           onCourseUpdate={handleCourseUpdate}
           totalPages={totalPages}

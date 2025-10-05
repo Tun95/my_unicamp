@@ -1,7 +1,11 @@
 // src/services/courseService.ts
 import axios, { AxiosError } from "axios";
 import { DashboardOverview, Course } from "../types/dashboard/dashboard";
-import { CourseFilters, CoursesResponse } from "../types/course/course";
+import {
+  CourseFilters,
+  CoursesResponse,
+  FilterOptionsResponse,
+} from "../types/course/course";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -42,6 +46,20 @@ class CourseService {
     }
   }
 
+  // Get filter options
+  async getFilterOptions(): Promise<FilterOptionsResponse> {
+    try {
+      const response = await this.api.get("/api/courses/filters");
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.error("Error fetching filter options:", axiosError);
+      throw new Error(
+        axiosError.response?.data?.message || "Failed to fetch filter options"
+      );
+    }
+  }
+
   // Update course
   async updateCourse(id: string, courseData: Partial<Course>): Promise<Course> {
     try {
@@ -60,9 +78,19 @@ class CourseService {
   }
 
   // Toggle course visibility
-  async toggleCourseVisibility(id: string): Promise<Course> {
+  async toggleCourseVisibility(
+    id: string,
+    action?: "hide" | "unhide"
+  ): Promise<Course> {
     try {
-      const response = await this.api.patch(`/api/admin/courses/${id}`);
+      // If no action is provided, determine it based on current state
+      // or let the backend handle the toggle logic
+      const requestBody = action ? { action } : {};
+
+      const response = await this.api.patch(
+        `/api/admin/courses/${id}`,
+        requestBody
+      );
       return response.data.data;
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;

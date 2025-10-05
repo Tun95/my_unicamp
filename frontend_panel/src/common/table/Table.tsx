@@ -8,12 +8,15 @@ import { getStatusColor } from "../../utilities/status/status";
 
 interface TableComponentProps {
   courses: Course[];
-  currentPage: number;
-  onPageChange: (page: number) => void;
+  fetchDashboardData?: () => Promise<void>;
   loading?: boolean;
 }
 
-function TableComponent({ courses, loading = false }: TableComponentProps) {
+function TableComponent({
+  courses,
+  loading = false,
+  fetchDashboardData,
+}: TableComponentProps) {
   const { theme } = useTheme();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
@@ -178,6 +181,7 @@ function TableComponent({ courses, loading = false }: TableComponentProps) {
       {selectedCourse && (
         <CourseDetailSidebar
           course={selectedCourse}
+          fetchDashboardData={fetchDashboardData}
           onClose={handleCloseSidebar}
         />
       )}
