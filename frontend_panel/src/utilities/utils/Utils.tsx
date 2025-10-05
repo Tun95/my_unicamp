@@ -4,15 +4,15 @@ export const formatNumberWithCommas = (num: number): string => {
   return validNumber.toLocaleString();
 };
 
-// Format date in "YYYY-MM-DD" format
-export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+// Format date with time
+export const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 // Format date for display (show day only for better readability)

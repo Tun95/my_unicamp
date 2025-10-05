@@ -1,6 +1,6 @@
 // FilterBox.tsx
 import { useState } from "react";
-import { useTheme } from "../../../custom hooks/Hooks";
+import { useTheme } from "../../custom hooks/Hooks";
 import { Warehouse } from "../../../types/data/datatype";
 
 interface FilterBoxProps {

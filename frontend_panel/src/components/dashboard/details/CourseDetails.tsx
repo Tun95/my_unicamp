@@ -2,6 +2,8 @@
 import { X } from "lucide-react";
 import { Course } from "../../../types/dashboard/dashboard";
 import { useTheme } from "../../../custom hooks/Hooks";
+import { getStatusColor } from "../../../utilities/status/status";
+import { formatDate } from "../../../utilities/utils/Utils";
 
 interface CourseDetailSidebarProps {
   course: Course;
@@ -10,29 +12,6 @@ interface CourseDetailSidebarProps {
 
 function CourseDetailSidebar({ course, onClose }: CourseDetailSidebarProps) {
   const { theme } = useTheme();
-
-  const getStatusColor = (degreeType: string) => {
-    switch (degreeType) {
-      case "Bachelor":
-        return "blue";
-      case "Master":
-        return "green";
-      case "PhD":
-        return "purple";
-      default:
-        return "gray";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   return (
     <div className={`fixed inset-0 z-50 pointer-events-none`}>

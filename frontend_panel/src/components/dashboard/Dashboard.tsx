@@ -1,6 +1,6 @@
 // Dashboard.tsx
 import { useEffect, useState } from "react";
-import TableComponent from "./table/Table";
+import TableComponent from "../../common/table/Table";
 import Widget from "./widget/Widget";
 import { useTheme } from "../../custom hooks/Hooks";
 import ChartComponent from "./chart/Chart";

@@ -1,9 +1,10 @@
 // TableComponent.tsx
 import { useState } from "react";
-import { useTheme } from "../../../custom hooks/Hooks";
+import { useTheme } from "../../custom hooks/Hooks";
 import { Loader } from "lucide-react";
-import { Course } from "../../../types/dashboard/dashboard";
-import CourseDetailSidebar from "../details/CourseDetails";
+import { Course } from "../../types/dashboard/dashboard";
+import CourseDetailSidebar from "../../components/dashboard/details/CourseDetails";
+import { getStatusColor } from "../../utilities/status/status";
 
 interface TableComponentProps {
   courses: Course[];
@@ -15,19 +16,6 @@ interface TableComponentProps {
 function TableComponent({ courses, loading = false }: TableComponentProps) {
   const { theme } = useTheme();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-
-  const getStatusColor = (degreeType: string) => {
-    switch (degreeType) {
-      case "Bachelor":
-        return "blue";
-      case "Master":
-        return "green";
-      case "PhD":
-        return "purple";
-      default:
-        return "gray";
-    }
-  };
 
   const handleRowClick = (course: Course) => {
     setSelectedCourse(course);
