@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, Moon, Sun, ChevronDown, Menu } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import user_image from "../../assets/users.png";
 import Sidebar from "../sidebar/Sidebar";
@@ -11,6 +11,8 @@ function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
 
   const { globalSearch, setGlobalSearch } = useSearch();
 
@@ -31,6 +33,12 @@ function Navbar() {
 
   const handleSearchChange = (value: string) => {
     setGlobalSearch(value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && globalSearch.trim()) {
+      navigate("/courses");
+    }
   };
 
   return (
@@ -61,6 +69,7 @@ function Navbar() {
               placeholder="Search courses..."
               value={globalSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={handleKeyPress}
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 pl-10 pr-4 py-2 rounded-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-gray-300 dark:focus:border-gray-600 text-sm transition-all"
             />
           </div>

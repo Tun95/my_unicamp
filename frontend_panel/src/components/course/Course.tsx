@@ -32,7 +32,7 @@ function Course() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCourses, setTotalCourses] = useState(0);
   const [filters, setFilters] = useState<FilterState>({
-    search: "",
+    search: globalSearch,
     university: "",
     degree_type: "",
     field_of_study: "",
@@ -47,6 +47,12 @@ function Course() {
   useEffect(() => {
     setFilters((prev) => ({ ...prev, search: globalSearch }));
   }, [globalSearch]);
+
+  useEffect(() => {
+    if (globalSearch.trim()) {
+      fetchCourses(1);
+    }
+  }, []);
 
   const fetchCourses = async (page: number = 1): Promise<void> => {
     try {

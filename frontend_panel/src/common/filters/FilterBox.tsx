@@ -25,6 +25,7 @@ function FilterBox({
   onClearAllFilters,
 }: FilterBoxProps) {
   const { theme } = useTheme();
+
   const [searchValue, setSearchValue] = useState("");
   const [universityValue, setUniversityValue] = useState("all");
   const [degreeTypeValue, setDegreeTypeValue] = useState("all");
