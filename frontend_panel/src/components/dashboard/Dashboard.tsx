@@ -11,7 +11,6 @@ import {
   generateRecentKpiData,
 } from "../../utilities/utils/Utils";
 import { Product } from "../../types/data/datatype";
-import FilterBox from "./filters/FilterBox";
 import { Loader } from "lucide-react";
 import { useQuery } from "@apollo/client";
 import { GET_PRODUCTS, GET_KPIS, GET_WAREHOUSES } from "../../graphql/queries";
@@ -247,12 +246,8 @@ function Dashboard() {
           Inventory Overview
         </h4>
         <div className="mt-1">
-          <FilterBox
-            onSearchChange={setSearchFilter}
-            onWarehouseChange={setWarehouseFilter}
-            onStatusChange={setStatusFilter}
-            warehouses={warehousesData?.warehouses || []}
-          />
+        
+        {/* LATEST FIVE HERE */}
           <TableComponent
             products={filteredProducts}
             currentPage={currentPage}

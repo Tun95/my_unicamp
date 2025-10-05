@@ -1,4 +1,5 @@
 const { HEALTH_STATUS } = require("../constants/constants");
+const aggregationController = require("../controllers/aggregation.controller");
 const courseController = require("../controllers/course.controller");
 const {
   idValidation,
@@ -42,6 +43,11 @@ setupRoutes = (server) => {
   server
     .route("/api/admin/courses/:id/permanent")
     .delete(idValidation, courseController.permanentDeleteCourse);
+
+  // Dashboard Aggregation Route
+  server
+    .route("/api/admin/dashboard/overview")
+    .get(aggregationController.getDashboardOverview);
 
   server.get("/health", async (req, res) => {
     res.status(200).json({ status: HEALTH_STATUS.UP });
