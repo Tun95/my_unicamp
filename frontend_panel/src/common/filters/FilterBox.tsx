@@ -259,7 +259,12 @@ function FilterBox({
 
       {/* Clear Filters Button */}
       <div className="mt-4 flex justify-end">
-        <button onClick={handleClearAll}>Clear All Filters</button>
+        <button
+          onClick={handleClearAll}
+          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          Clear All Filters
+        </button>
       </div>
     </div>
   );
