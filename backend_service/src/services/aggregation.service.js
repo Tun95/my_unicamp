@@ -239,7 +239,7 @@ class AggregationService {
     try {
       const recent = await Course.find({ is_active: true })
         .sort({ createdAt: -1 })
-        .limit(8)
+        .limit(5)
         .select(
           "title university degree_type field_of_study createdAt duration fees"
         )

@@ -3,171 +3,13 @@ import TableComponent from "./table/Table";
 import Widget from "./widget/Widget";
 import { useDateRange, useTheme } from "../../custom hooks/Hooks";
 import ChartComponent from "./chart/Chart";
-import { useState, useEffect, useMemo } from "react";
-import {
-  calculateFillRate,
-  calculateTotalDemand,
-  calculateTotalStock,
-  generateRecentKpiData,
-} from "../../utilities/utils/Utils";
-import { Product } from "../../types/data/datatype";
 import { Loader } from "lucide-react";
-import { useQuery } from "@apollo/client";
-import { GET_PRODUCTS, GET_KPIS, GET_WAREHOUSES } from "../../graphql/queries";
-import {
-  KPIsQueryData,
-  ProductsQueryData,
-  WarehousesQueryData,
-} from "../../types/graphql/graphql";
-import { client } from "../../graphql/client";
 
+
+//RENAME THE VALUES TO COURSE RELATED
 function Dashboard() {
   const { theme } = useTheme();
   const { selectedDateRange } = useDateRange();
-
-  // GraphQL Queries
-  const {
-    data: productsData,
-    loading: productsLoading,
-    error: productsError,
-  } = useQuery<ProductsQueryData>(GET_PRODUCTS);
-
-  const {
-    data: kpisData,
-    loading: kpisLoading,
-    error: kpisError,
-    refetch: refetchKPIs,
-  } = useQuery<KPIsQueryData>(GET_KPIS, {
-    skip: true,
-    fetchPolicy: "network-only",
-  });
-
-  const { data: warehousesData } =
-    useQuery<WarehousesQueryData>(GET_WAREHOUSES);
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [kpiData, setKpiData] = useState({
-    totalStock: 0,
-    totalDemand: 0,
-    fillRate: 0,
-  });
-  const [searchFilter, setSearchFilter] = useState("");
-  const [warehouseFilter, setWarehouseFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Refetch KPIs when date range changes
-  useEffect(() => {
-    if (selectedDateRange) {
-      console.log("Refetching KPIs with range:", selectedDateRange);
-      refetchKPIs({ range: selectedDateRange });
-    }
-  }, [selectedDateRange, refetchKPIs]);
-
-  // Update products when data is fetched
-  useEffect(() => {
-    if (productsData) {
-      setProducts(productsData.products);
-    }
-  }, [productsData]);
-
-  // Calculate KPIs when products change
-  useEffect(() => {
-    if (products.length > 0) {
-      const totalStock = calculateTotalStock(products);
-      const totalDemand = calculateTotalDemand(products);
-      const fillRate = calculateFillRate(products);
-
-      setKpiData({
-        totalStock,
-        totalDemand,
-        fillRate,
-      });
-    }
-  }, [products]);
-
-  // Use memoized chart data to prevent unnecessary re-renders
-  const chartData = useMemo(() => {
-    if (kpisData && kpisData.kpis) {
-      console.log("Using server data:", kpisData.kpis.length, "days");
-      return kpisData.kpis;
-    }
-
-    if (kpisError) {
-      console.log("Using fallback data for:", selectedDateRange);
-      let days = 7;
-      if (selectedDateRange === "14d") days = 14;
-      if (selectedDateRange === "30d") days = 30;
-      return generateRecentKpiData(days);
-    }
-
-    // Generate data based on selected date range while loading
-    if (selectedDateRange) {
-      let days = 7;
-      if (selectedDateRange === "14d") days = 14;
-      if (selectedDateRange === "30d") days = 30;
-      return generateRecentKpiData(days);
-    }
-
-    // Return empty array if no range is selected
-    return [];
-  }, [kpisData, kpisError, selectedDateRange]);
-
-  // Filter products based on filters
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      // Search filter
-      const matchesSearch =
-        searchFilter === "" ||
-        product.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        product.sku.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        product.id.toLowerCase().includes(searchFilter.toLowerCase());
-
-      // Warehouse filter
-      const matchesWarehouse =
-        warehouseFilter === "all" || product.warehouse === warehouseFilter;
-
-      // Status filter
-      let matchesStatus = true;
-      if (statusFilter !== "all") {
-        const status =
-          product.stock > product.demand
-            ? "healthy"
-            : product.stock === product.demand
-            ? "low"
-            : "critical";
-        matchesStatus = status === statusFilter;
-      }
-
-      return matchesSearch && matchesWarehouse && matchesStatus;
-    });
-  }, [products, searchFilter, warehouseFilter, statusFilter]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchFilter, warehouseFilter, statusFilter]);
-
-  // HANDLE PRODUCT UPDATE
-  const handleProductUpdate = (updatedProduct: Product) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
-
-    client.cache.updateQuery({ query: GET_PRODUCTS }, (data) => {
-      if (data) {
-        return {
-          products: data.products.map((p: Product) =>
-            p.id === updatedProduct.id ? updatedProduct : p
-          ),
-        };
-      }
-      return data;
-    });
-  };
-
-  // Combined loading state
-  const loading = productsLoading || kpisLoading;
 
   // Handle errors
   if (productsError) {
@@ -246,8 +88,7 @@ function Dashboard() {
           Inventory Overview
         </h4>
         <div className="mt-1">
-        
-        {/* LATEST FIVE HERE */}
+          {/* LATEST FIVE HERE */}
           <TableComponent
             products={filteredProducts}
             currentPage={currentPage}
