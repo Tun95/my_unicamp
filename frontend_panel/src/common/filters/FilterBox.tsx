@@ -12,6 +12,7 @@ interface FilterBoxProps {
   onFieldOfStudyChange: (value: string) => void;
   onLocationChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  onClearAllFilters?: () => void;
 }
 
 function FilterBox({
@@ -21,6 +22,7 @@ function FilterBox({
   onFieldOfStudyChange,
   onLocationChange,
   onStatusChange,
+  onClearAllFilters,
 }: FilterBoxProps) {
   const { theme } = useTheme();
   const [searchValue, setSearchValue] = useState("");
@@ -91,6 +93,22 @@ function FilterBox({
     const value = e.target.value;
     setStatusValue(value);
     onStatusChange(value === "all" ? "" : value);
+  };
+
+  const handleClearAll = () => {
+    setSearchValue("");
+    setUniversityValue("all");
+    setDegreeTypeValue("all");
+    setFieldOfStudyValue("all");
+    setLocationValue("all");
+    setStatusValue("all");
+    onSearchChange("");
+    onUniversityChange("");
+    onDegreeTypeChange("");
+    onFieldOfStudyChange("");
+    onLocationChange("");
+    onStatusChange("");
+    onClearAllFilters?.();
   };
 
   if (loading) {
@@ -240,25 +258,7 @@ function FilterBox({
 
       {/* Clear Filters Button */}
       <div className="mt-4 flex justify-end">
-        <button
-          onClick={() => {
-            setSearchValue("");
-            setUniversityValue("all");
-            setDegreeTypeValue("all");
-            setFieldOfStudyValue("all");
-            setLocationValue("all");
-            setStatusValue("all");
-            onSearchChange("");
-            onUniversityChange("");
-            onDegreeTypeChange("");
-            onFieldOfStudyChange("");
-            onLocationChange("");
-            onStatusChange("");
-          }}
-          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          Clear All Filters
-        </button>
+        <button onClick={handleClearAll}>Clear All Filters</button>
       </div>
     </div>
   );

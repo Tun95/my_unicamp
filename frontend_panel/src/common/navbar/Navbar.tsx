@@ -4,14 +4,15 @@ import { Link, NavLink } from "react-router-dom";
 
 import user_image from "../../assets/users.png";
 import Sidebar from "../sidebar/Sidebar";
-import { useTheme } from "../../custom hooks/Hooks";
+import { useSearch, useTheme } from "../../custom hooks/Hooks";
 
 function Navbar() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [localSearch, setLocalSearch] = useState("");
   const { theme, toggleTheme } = useTheme();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const { globalSearch, setGlobalSearch } = useSearch();
 
   // Handle click outside dropdown
   useEffect(() => {
@@ -27,6 +28,10 @@ function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleSearchChange = (value: string) => {
+    setGlobalSearch(value);
+  };
 
   return (
     <>
@@ -54,8 +59,8 @@ function Navbar() {
             <input
               type="text"
               placeholder="Search courses..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
+              value={globalSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 pl-10 pr-4 py-2 rounded-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-gray-300 dark:focus:border-gray-600 text-sm transition-all"
             />
           </div>

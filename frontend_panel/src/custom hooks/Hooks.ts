@@ -2,9 +2,7 @@
 import { useContext } from "react";
 import { ThemeContextType } from "../types/theme/theme-types";
 import { ThemeContext } from "../context/ThemeContext";
-
-import { DateRangeContextType } from "../types/date/daterange";
-import { DateRangeContext } from "../context/DateRangeContext";
+import { SearchContext, SearchContextType } from "../context/Context";
 
 export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
@@ -14,10 +12,10 @@ export const useTheme = (): ThemeContextType => {
   return context;
 };
 
-export const useDateRange = (): DateRangeContextType => {
-  const context = useContext(DateRangeContext);
+export const useSearch = (): SearchContextType => {
+  const context = useContext(SearchContext);
   if (context === undefined) {
-    throw new Error("useDateRange must be used within a DateRangeProvider");
+    throw new Error("useSearch must be used within a SearchProvider");
   }
   return context;
 };

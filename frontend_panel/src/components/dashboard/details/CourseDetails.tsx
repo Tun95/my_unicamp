@@ -266,7 +266,7 @@ function CourseDetailSidebar({
                       </select>
                     ) : (
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
+                        className={`block w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
                           course.degree_type
                         )}-100 text-${getStatusColor(
                           course.degree_type
@@ -381,7 +381,7 @@ function CourseDetailSidebar({
                       className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                     />
                   ) : (
-                    <p className="text-gray-900 dark:text-white mt-1">
+                    <p className="text-gray-900 dark:text-white mt-1 line-clamp-3 overflow-hidden">
                       {course.description}
                     </p>
                   )}

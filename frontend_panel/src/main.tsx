@@ -5,18 +5,18 @@ import App from "./App.tsx";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
-import { DateRangeProvider } from "./context/DateRangeContext.tsx";
+import { SearchProvider } from "./context/Context.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Router>
     <ThemeProvider>
-      <DateRangeProvider>
+      <SearchProvider>
         <HelmetProvider>
           <StrictMode>
             <App />
           </StrictMode>
         </HelmetProvider>
-      </DateRangeProvider>
+      </SearchProvider>
     </ThemeProvider>
   </Router>
 );

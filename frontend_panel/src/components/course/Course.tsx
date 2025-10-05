@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react"; // Add Plus import
 import FilterBox from "../../common/filters/FilterBox";
-import { useTheme } from "../../custom hooks/Hooks";
+import { useSearch, useTheme } from "../../custom hooks/Hooks";
 import { courseService } from "../../services/courseService";
 import { Course as CourseType } from "../../types/dashboard/dashboard";
 import {
@@ -24,6 +24,7 @@ interface FilterState {
 
 function Course() {
   const { theme } = useTheme();
+  const { globalSearch, setGlobalSearch } = useSearch();
   const [courses, setCourses] = useState<CourseType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,11 @@ function Course() {
   const [showCreateCourse, setShowCreateCourse] = useState(false); // Add modal state
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
     null
-  ); // Add filter options state
+  );
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: globalSearch }));
+  }, [globalSearch]);
 
   const fetchCourses = async (page: number = 1): Promise<void> => {
     try {
@@ -102,6 +107,7 @@ function Course() {
 
   const handleSearchChange = (value: string): void => {
     setFilters((prev) => ({ ...prev, search: value }));
+    setGlobalSearch(value);
   };
 
   const handleUniversityChange = (value: string): void => {
@@ -141,6 +147,19 @@ function Course() {
     fetchCourses(currentPage);
   };
 
+  // Clear all filters including global search
+  const handleClearAllFilters = (): void => {
+    setFilters({
+      search: "",
+      university: "",
+      degree_type: "",
+      field_of_study: "",
+      location: "",
+      is_active: "",
+    });
+    setGlobalSearch("");
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -166,7 +185,7 @@ function Course() {
           className={`w-full overflow-hidden ${theme === "dark" ? "dark" : ""}`}
         >
           {/* Header with Add Course Button */}
-          <div className="flex justify-between items-center mb-4 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
+          <div className="flex justify-between items-center mb-4 pb-2 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl">
                 Course Management
@@ -196,6 +215,7 @@ function Course() {
           onFieldOfStudyChange={handleFieldOfStudyChange}
           onLocationChange={handleLocationChange}
           onStatusChange={handleStatusChange}
+          onClearAllFilters={handleClearAllFilters}
         />
 
         <TableComponent
