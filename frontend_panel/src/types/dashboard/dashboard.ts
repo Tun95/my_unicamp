@@ -4,11 +4,26 @@ export interface Course {
   _id: string;
   title: string;
   university: string;
+  duration: string;
+  location: string;
+  fees: string;
+  description: string;
   degree_type: string;
   field_of_study: string;
-  duration: string;
-  fees: string;
+  intake_months: string[];
+  language: string;
+  is_active: boolean;
   createdAt: string;
+  updatedAt: string;
+  tuition_fee?: {
+    amount: number;
+    currency: string;
+    period: string;
+  };
+  entry_requirements?: {
+    prerequisites: string[];
+    language_tests: string[];
+  };
 }
 
 export interface DegreeTypeData {
@@ -82,4 +97,40 @@ export interface DashboardOverview {
     createdAt: string;
   }>;
   last_updated: string;
+}
+
+// src/types/course/course.ts
+export interface CourseFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  university?: string;
+  degree_type?: string;
+  field_of_study?: string;
+  location?: string;
+  is_active?: boolean;
+}
+
+export interface PaginationInfo {
+  total_pages: number;
+  current_page: number;
+  total: number;
+  limit: number;
+}
+
+export interface CoursesResponse {
+  data: Course[];
+  pagination: PaginationInfo;
+  filters?: {
+    field_of_study?: string;
+    university?: string;
+    degree_type?: string;
+    location?: string;
+  };
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
 }

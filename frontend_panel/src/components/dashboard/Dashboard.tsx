@@ -14,7 +14,6 @@ import {
 
 function Dashboard() {
   const { theme } = useTheme();
-  // const { selectedDateRange } = useDateRange();
   const [dashboardData, setDashboardData] = useState<DashboardOverview | null>(
     null
   );
