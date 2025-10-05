@@ -83,6 +83,130 @@ class CourseService {
     }
   }
 
+  // Get latest courses (Public - only active)
+  async getLatestCourses(limit = 5) {
+    try {
+      const courses = await Course.find({ is_active: true })
+        .select(
+          "-entry_requirements -contact_email -website_url -createdAt -updatedAt -__v"
+        )
+        .sort({ createdAt: -1 }) // Latest first
+        .limit(limit);
+
+      await logger.info("Latest courses retrieved successfully", {
+        service: "CourseService",
+        method: "getLatestCourses",
+        count: courses.length,
+        limit,
+      });
+
+      return courses;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getLatestCourses",
+        limit,
+      });
+      throw error;
+    }
+  }
+
+  // Get all courses for admin (including inactive courses)
+  async getAdminCourses({
+    page = 1,
+    limit = 10,
+    search,
+    university,
+    degree_type,
+    field_of_study,
+    location,
+    is_active,
+  }) {
+    try {
+      let query = {};
+
+      // Filter by active status if provided
+      if (is_active !== undefined) {
+        query.is_active = is_active;
+      }
+
+      // Search across multiple fields (including inactive)
+      if (search) {
+        query.$or = [
+          { title: { $regex: search, $options: "i" } },
+          { university: { $regex: search, $options: "i" } },
+          { field_of_study: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { isbn: { $regex: search, $options: "i" } }, // Include additional fields for admin
+        ];
+      }
+
+      // Filter by university
+      if (university) {
+        query.university = { $regex: university, $options: "i" };
+      }
+
+      // Filter by degree type
+      if (degree_type) {
+        query.degree_type = degree_type;
+      }
+
+      // Filter by field of study
+      if (field_of_study) {
+        query.field_of_study = { $regex: field_of_study, $options: "i" };
+      }
+
+      // Filter by location
+      if (location) {
+        query.location = { $regex: location, $options: "i" };
+      }
+
+      const courses = await Course.find(query)
+        .select("-__v") // Include all fields for admin, only exclude version key
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .sort({ is_active: -1, createdAt: -1, university: 1 }); // Active first, then by creation date
+
+      const total = await Course.countDocuments(query);
+
+      // Get statistics for admin
+      const activeCount = await Course.countDocuments({ is_active: true });
+      const inactiveCount = await Course.countDocuments({ is_active: false });
+
+      await logger.info("Admin courses retrieved successfully", {
+        service: "CourseService",
+        method: "getAdminCourses",
+        count: courses.length,
+        total,
+        active_count: activeCount,
+        inactive_count: inactiveCount,
+        page,
+        limit,
+      });
+
+      return {
+        courses,
+        pagination: {
+          total_pages: Math.ceil(total / limit),
+          current_page: parseInt(page),
+          total,
+          limit: parseInt(limit),
+        },
+        statistics: {
+          total_courses: total,
+          active_courses: activeCount,
+          inactive_courses: inactiveCount,
+        },
+      };
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getAdminCourses",
+      });
+      throw error;
+    }
+  }
+
   // Get course by ID with full details
   async getCourseById(courseId) {
     try {
@@ -310,6 +434,34 @@ class CourseService {
       });
       throw error;
     }
+  }
+
+  // Helper method to find duplicate courses
+  async findDuplicateCourse(courseData, excludeCourseId = null) {
+    const query = {
+      is_active: true,
+      $or: [
+        // Exact match on key fields
+        {
+          title: courseData.title,
+          university: courseData.university,
+          degree_type: courseData.degree_type,
+        },
+        // Similar course check (case insensitive)
+        {
+          title: { $regex: new RegExp(courseData.title, "i") },
+          university: { $regex: new RegExp(courseData.university, "i") },
+          degree_type: courseData.degree_type,
+        },
+      ],
+    };
+
+    // Exclude current course when updating or toggling
+    if (excludeCourseId) {
+      query._id = { $ne: excludeCourseId };
+    }
+
+    return await Course.findOne(query);
   }
 }
 

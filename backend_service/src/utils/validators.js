@@ -95,6 +95,62 @@ const getCoursesValidation = [
   handleValidationErrors,
 ];
 
+// Get admin courses validation
+const getAdminCoursesValidation = [
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive integer")
+    .toInt(),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("Limit must be between 1 and 100")
+    .toInt(),
+  query("search")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Search query too long")
+    .escape(),
+  query("university")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("University filter too long")
+    .escape(),
+  query("degree_type")
+    .optional()
+    .isString()
+    .trim()
+    .isIn(["Bachelor", "Master", "PhD", "Diploma", "Certificate"])
+    .withMessage(
+      "Invalid degree type. Must be: Bachelor, Master, PhD, Diploma, or Certificate"
+    ),
+  query("field_of_study")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Field of study filter too long")
+    .escape(),
+  query("location")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Location filter too long")
+    .escape(),
+  query("is_active")
+    .optional()
+    .isBoolean()
+    .withMessage("is_active must be a boolean")
+    .toBoolean(),
+  handleValidationErrors,
+];
+
 // Create course validation
 const createCourseValidation = [
   body("title")
@@ -286,6 +342,9 @@ const toggleCourseVisibilityValidation = [
 module.exports = {
   idValidation,
   getCoursesValidation,
+
+  getAdminCoursesValidation,
+
   createCourseValidation,
   updateCourseValidation,
   toggleCourseVisibilityValidation,

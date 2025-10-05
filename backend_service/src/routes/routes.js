@@ -6,6 +6,7 @@ const {
   createCourseValidation,
   updateCourseValidation,
   toggleCourseVisibilityValidation,
+  getAdminCoursesValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -17,9 +18,20 @@ setupRoutes = (server) => {
 
   server.route("/api/courses/filters").get(courseController.getFilterOptions);
 
+  // Latest courses
+  server
+    .route("/api/admin/courses/latest")
+    .get(courseController.getLatestCourses);
+  server
+    .route("/api/admin/courses")
+    .get(getAdminCoursesValidation, courseController.getAdminCourses);
+
   server
     .route("/api/courses/:id")
-    .get(idValidation, courseController.getCourseById)
+    .get(idValidation, courseController.getCourseById);
+
+  server
+    .route("/api/admin/courses/:id")
     .put(idValidation, updateCourseValidation, courseController.updateCourse)
     .patch(
       idValidation,
@@ -28,7 +40,7 @@ setupRoutes = (server) => {
     );
 
   server
-    .route("/api/courses/:id/permanent")
+    .route("/api/admin/courses/:id/permanent")
     .delete(idValidation, courseController.permanentDeleteCourse);
 
   server.get("/health", async (req, res) => {

@@ -46,6 +46,86 @@ class CourseController {
     }
   }
 
+  // Get latest courses for admin (limited to 5)
+  async getLatestCourses(req, res) {
+    try {
+      const { limit = 5 } = req.query;
+
+      const courses = await courseService.getLatestCourses(parseInt(limit));
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: courses,
+        meta: {
+          count: courses.length,
+          limit: parseInt(limit),
+          description: "Latest active courses sorted by creation date",
+        },
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getLatestCourses",
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Get all courses for admin (including inactive courses)
+  async getAdminCourses(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        university,
+        degree_type,
+        field_of_study,
+        location,
+        is_active,
+      } = req.query;
+
+      const result = await courseService.getAdminCourses({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search,
+        university,
+        degree_type,
+        field_of_study,
+        location,
+        is_active: is_active !== undefined ? is_active === "true" : undefined,
+      });
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: result.courses,
+        pagination: result.pagination,
+        filters: {
+          search,
+          university,
+          degree_type,
+          field_of_study,
+          location,
+          is_active,
+        },
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getAdminCourses",
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
   // Get course by ID
   async getCourseById(req, res) {
     try {
