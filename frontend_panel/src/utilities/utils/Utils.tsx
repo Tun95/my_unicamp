@@ -33,19 +33,17 @@ export const formatNumberNoDecimalShort = (value: number): string => {
   return `${Math.floor(value)}${suffixes[suffixIndex]}`;
 };
 
-// FORMAT NUMBER WITH 2 DECIMAL PLACES WITHOUT SUFFIXES
-export const formatNumberWithTwoDecimalsNoSuffix = (
-  value: number | string | null | undefined
-): string => {
-  const numericValue = parseFloat(value as string);
-
-  if (isNaN(numericValue)) {
-    return "0";
-  }
-
-  const formattedValue = numericValue.toFixed(2);
-
-  return formattedValue.endsWith(".00")
-    ? formattedValue.slice(0, -3)
-    : formattedValue;
-};
+export const commonIntakeMonths = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];

@@ -1,6 +1,34 @@
 import { Course } from "../dashboard/dashboard";
 
-// src/types/course/course.ts
+export interface CreateCourseData {
+  title: string;
+  university: string;
+  duration: string;
+  location: string;
+  fees: string;
+  description: string;
+  degree_type: string;
+  field_of_study: string;
+  intake_months: string[];
+  application_deadline?: string;
+  language: string;
+  tuition_fee?: {
+    amount: number;
+    currency: string;
+    period: string;
+  };
+  entry_requirements?: {
+    minimum_gpa?: number;
+    language_tests?: Array<{
+      test_type: string;
+      minimum_score: string;
+    }>;
+    prerequisites?: string[];
+  };
+  website_url?: string;
+  contact_email?: string;
+}
+
 export interface CourseFilters {
   page?: number;
   limit?: number;

@@ -278,7 +278,7 @@ class CourseService {
       });
 
       if (existingCourse) {
-        throw new Error("COURSE_ALREADY_EXISTS");
+        throw new Error(ERROR_MESSAGES.COURSE_ALREADY_EXISTS);
       }
 
       const course = new Course(courseData);

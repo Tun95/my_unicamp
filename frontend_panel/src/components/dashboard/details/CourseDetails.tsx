@@ -3,7 +3,7 @@ import { X, Edit, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { Course } from "../../../types/dashboard/dashboard";
 import { courseService } from "../../../services/courseService";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect import
 import { toast } from "sonner";
 import { getStatusColor } from "../../../utilities/status/status";
 import { formatDate } from "../../../utilities/utils/Utils";
@@ -30,6 +30,13 @@ function CourseDetailSidebar({
   const [isEditing, setIsEditing] = useState(false);
   const [editedCourse, setEditedCourse] = useState(course);
   const [loading, setLoading] = useState(false);
+
+  // Reset state when course prop changes
+  useEffect(() => {
+    // Reset to the new course data and exit edit mode
+    setEditedCourse(course);
+    setIsEditing(false);
+  }, [course]);
 
   const handleEditToggle = () => {
     if (isEditing) {

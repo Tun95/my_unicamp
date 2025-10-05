@@ -237,7 +237,7 @@ class AggregationService {
   // Get recent courses
   async getRecentCourses() {
     try {
-      const recent = await Course.find({ is_active: true })
+      const recent = await Course.find()
         .sort({ createdAt: -1 })
         .limit(5)
         .select(

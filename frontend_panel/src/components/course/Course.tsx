@@ -1,11 +1,17 @@
 // Course.tsx
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react"; // Add Plus import
 import FilterBox from "../../common/filters/FilterBox";
 import { useTheme } from "../../custom hooks/Hooks";
 import { courseService } from "../../services/courseService";
 import { Course as CourseType } from "../../types/dashboard/dashboard";
-import { CourseFilters, CoursesResponse } from "../../types/course/course";
+import {
+  CourseFilters,
+  CoursesResponse,
+  FilterOptions,
+} from "../../types/course/course";
 import TableComponent from "./table/CourseTable";
+import CreateCourseModal from "../../common/modal/CreateCourseModal";
 
 interface FilterState {
   search: string;
@@ -31,6 +37,10 @@ function Course() {
     location: "",
     is_active: "",
   });
+  const [showCreateCourse, setShowCreateCourse] = useState(false); // Add modal state
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
+    null
+  ); // Add filter options state
 
   const fetchCourses = async (page: number = 1): Promise<void> => {
     try {
@@ -67,8 +77,19 @@ function Course() {
     }
   };
 
+  // Fetch filter options
+  const fetchFilterOptions = async (): Promise<void> => {
+    try {
+      const response = await courseService.getFilterOptions();
+      setFilterOptions(response.data);
+    } catch (err: unknown) {
+      console.error("Error fetching filter options:", err);
+    }
+  };
+
   useEffect(() => {
     fetchCourses();
+    fetchFilterOptions();
   }, []);
 
   useEffect(() => {
@@ -142,9 +163,9 @@ function Course() {
         <div
           className={`w-full overflow-hidden ${theme === "dark" ? "dark" : ""}`}
         >
-          {/* Welcome message */}
-          <div className="mb-2 max-480px:mb-1">
-            <div className="content max-900px:px-2 max-900px:mt-3 max-480px:p-2 max-480px:pb-0">
+          {/* Header with Add Course Button */}
+          <div className="flex justify-between items-center p-6 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
+            <div>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl">
                 Course Management
               </h2>
@@ -152,6 +173,16 @@ function Course() {
                 Manage all courses, filter by university, degree type, field of
                 study, and more.
               </p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => setShowCreateCourse(true)}
+                className="whitespace-nowrap flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                title="Add a new course"
+              >
+                <Plus size={18} />
+                Add Course
+              </button>
             </div>
           </div>
         </div>
@@ -173,6 +204,14 @@ function Course() {
           loading={loading}
           onCourseUpdate={handleCourseUpdate}
           totalPages={totalPages}
+        />
+
+        {/* Create Course Modal */}
+        <CreateCourseModal
+          isOpen={showCreateCourse}
+          onClose={() => setShowCreateCourse(false)}
+          fetchCourses={fetchCourses}
+          filterOptions={filterOptions}
         />
       </div>
     </div>

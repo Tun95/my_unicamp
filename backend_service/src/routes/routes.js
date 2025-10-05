@@ -14,7 +14,10 @@ setupRoutes = (server) => {
   // Course Routes
   server
     .route("/api/courses")
-    .get(getCoursesValidation, courseController.getCourses)
+    .get(getCoursesValidation, courseController.getCourses);
+
+  server
+    .route("/api/admin/courses")
     .post(createCourseValidation, courseController.createCourse);
 
   server.route("/api/courses/filters").get(courseController.getFilterOptions);
@@ -23,6 +26,7 @@ setupRoutes = (server) => {
   server
     .route("/api/admin/courses/latest")
     .get(courseController.getLatestCourses);
+    
   server
     .route("/api/admin/courses")
     .get(getAdminCoursesValidation, courseController.getAdminCourses);

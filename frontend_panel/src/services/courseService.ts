@@ -4,6 +4,7 @@ import { DashboardOverview, Course } from "../types/dashboard/dashboard";
 import {
   CourseFilters,
   CoursesResponse,
+  CreateCourseData,
   FilterOptionsResponse,
 } from "../types/course/course";
 
@@ -14,6 +15,20 @@ class CourseService {
     baseURL: API_BASE_URL,
     timeout: 100000,
   });
+
+  // Create new course
+  async createCourse(courseData: CreateCourseData): Promise<Course> {
+    try {
+      const response = await this.api.post("/api/admin/courses", courseData);
+      return response.data.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.error("Error creating course:", axiosError);
+      throw new Error(
+        axiosError.response?.data?.message || "Failed to create course"
+      );
+    }
+  }
 
   // Get comprehensive dashboard overview
   async getDashboardOverview(): Promise<DashboardOverview> {
