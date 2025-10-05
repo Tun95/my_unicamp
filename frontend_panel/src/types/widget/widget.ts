@@ -1,5 +1,5 @@
-// types/widget/widget.ts
+// src/types/widget/widget.ts
 export interface WidgetProps {
-  type: "stock" | "demand" | "fillRate";
+  type: "totalCourses" | "activeCourses" | "activityRate" | "universities";
   value: number;
 }

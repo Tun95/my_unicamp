@@ -1,3 +1,4 @@
+// Widget.tsx
 import { Info } from "lucide-react";
 import { formatNumberWithCommas } from "../../../utilities/utils/Utils";
 import { WidgetProps } from "../../../types/widget/widget";
@@ -5,23 +6,29 @@ import { WidgetProps } from "../../../types/widget/widget";
 const Widget: React.FC<WidgetProps> = ({ type, value = 0 }) => {
   const getWidgetConfig = (type: string) => {
     switch (type) {
-      case "stock":
+      case "totalCourses":
         return {
-          title: "Total Stock",
-          tooltip: "Sum of all inventory items currently in stock",
+          title: "Total Courses",
+          tooltip: "Total number of courses in the system",
           format: (val: number) => formatNumberWithCommas(val),
         };
-      case "demand":
+      case "activeCourses":
         return {
-          title: "Total Demand",
-          tooltip: "Sum of all customer demand requests",
+          title: "Active Courses",
+          tooltip: "Number of currently active courses",
           format: (val: number) => formatNumberWithCommas(val),
         };
-      case "fillRate":
+      case "activityRate":
         return {
-          title: "Fill Rate",
-          tooltip: "Percentage of demand fulfilled from available stock",
-          format: (val: number) => `${val.toFixed(1)}%`,
+          title: "Activity Rate",
+          tooltip: "Percentage of courses that are active",
+          format: (val: number) => `${val}%`,
+        };
+      case "universities":
+        return {
+          title: "Universities",
+          tooltip: "Number of universities offering courses",
+          format: (val: number) => formatNumberWithCommas(val),
         };
       default:
         return {

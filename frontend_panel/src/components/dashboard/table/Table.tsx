@@ -1,62 +1,48 @@
 // TableComponent.tsx
-import { useEffect, useState } from "react";
-import { Pagination } from "antd";
-import ProductDetailSidebar from "../product details/ProductDetail";
+import { useState } from "react";
 import { useTheme } from "../../../custom hooks/Hooks";
-import { Product } from "../../../types/data/datatype";
-import { DesktopTableView, MobileTableView } from "./tableviews/TableViews";
 import { Loader } from "lucide-react";
+import { Course } from "../../../types/dashboard/dashboard";
+import CourseDetailSidebar from "../details/CourseDetails";
 
 interface TableComponentProps {
-  products: Product[];
+  courses: Course[];
   currentPage: number;
   onPageChange: (page: number) => void;
   loading?: boolean;
-  onProductUpdate?: (product: Product) => void;
 }
 
-function TableComponent({
-  products,
-  currentPage,
-  onPageChange,
-  loading = false,
-  onProductUpdate,
-}: TableComponentProps) {
+function TableComponent({ courses, loading = false }: TableComponentProps) {
   const { theme } = useTheme();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const pageSize = 10;
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
-  const getStatus = (stock: number, demand: number) => {
-    if (stock > demand) return { status: "Healthy", color: "green" };
-    if (stock === demand) return { status: "Low", color: "orange" };
-    return { status: "Critical", color: "red" };
-  };
-
-  const handleRowClick = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  // Pagination logic
-  const paginatedData = products.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  useEffect(() => {
-    if (selectedProduct && products) {
-      const updatedProduct = products.find((p) => p.id === selectedProduct.id);
-      if (updatedProduct) {
-        setSelectedProduct(updatedProduct);
-      }
+  const getStatusColor = (degreeType: string) => {
+    switch (degreeType) {
+      case "Bachelor":
+        return "blue";
+      case "Master":
+        return "green";
+      case "PhD":
+        return "purple";
+      default:
+        return "gray";
     }
-  }, [products, selectedProduct]);
+  };
+
+  const handleRowClick = (course: Course) => {
+    setSelectedCourse(course);
+  };
+
+  const handleCloseSidebar = () => {
+    setSelectedCourse(null);
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-600 dark:text-gray-400 flex justify-center items-center">
-          <Loader className="animate-spin text-gray-500 dark:text-gray-400" />{" "}
-          Loading products...
+          <Loader className="animate-spin text-gray-500 dark:text-gray-400" />
+          Loading courses...
         </div>
       </div>
     );
@@ -70,62 +56,142 @@ function TableComponent({
             theme === "dark" ? "bg-gray-800" : "bg-white"
           }`}
         >
-          {/* Desktop View */}
+          {/* Desktop Table View */}
           <div className="hidden md:block">
-            <DesktopTableView
-              data={paginatedData}
-              onRowClick={handleRowClick}
-              getStatus={getStatus}
-              theme={theme}
-            />
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr
+                    className={`${
+                      theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                    } border-b border-gray-200 dark:border-gray-700`}
+                  >
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      Course Title
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      University
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      Degree Type
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      Field of Study
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      Duration
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-900 dark:text-white">
+                      Fees
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {courses.map((course) => (
+                    <tr
+                      key={course._id}
+                      className={`border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:${
+                        theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                      }`}
+                      onClick={() => handleRowClick(course)}
+                    >
+                      <td className="p-4 text-sm text-gray-900 dark:text-white">
+                        {course.title}
+                      </td>
+                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                        {course.university}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
+                            course.degree_type
+                          )}-100 text-${getStatusColor(
+                            course.degree_type
+                          )}-800 dark:bg-${getStatusColor(
+                            course.degree_type
+                          )}-900 dark:text-${getStatusColor(
+                            course.degree_type
+                          )}-200`}
+                        >
+                          {course.degree_type}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                        {course.field_of_study}
+                      </td>
+                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                        {course.duration}
+                      </td>
+                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                        {course.fees}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Mobile View */}
           <div className="md:hidden">
-            {products.length === 0 ? (
+            {courses.length === 0 ? (
               <div className="flex bg-gray-100 dark:bg-gray-800 rounded-md items-center justify-center h-40">
                 <div className="text-gray-600 dark:text-gray-400">
-                  No products found
+                  No courses found
                 </div>
               </div>
             ) : (
-              <MobileTableView
-                data={paginatedData}
-                onRowClick={handleRowClick}
-                getStatus={getStatus}
-                theme={theme}
-              />
+              <div className="space-y-4 p-4">
+                {courses.map((course) => (
+                  <div
+                    key={course._id}
+                    className={`border border-gray-200 dark:border-gray-700 rounded-lg p-4 cursor-pointer hover:${
+                      theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                    }`}
+                    onClick={() => handleRowClick(course)}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                        {course.title}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${getStatusColor(
+                          course.degree_type
+                        )}-100 text-${getStatusColor(
+                          course.degree_type
+                        )}-800 dark:bg-${getStatusColor(
+                          course.degree_type
+                        )}-900 dark:text-${getStatusColor(
+                          course.degree_type
+                        )}-200`}
+                      >
+                        {course.degree_type}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      {course.university}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      {course.field_of_study}
+                    </p>
+                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                      <span>{course.duration}</span>
+                      <span>{course.fees}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
-
-          {/* Pagination */}
-          <div className="p-4 flex justify-end">
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={products.length}
-              onChange={(page) => onPageChange(page)}
-              showSizeChanger={false}
-              className={`pagination-custom ${
-                theme === "dark"
-                  ? "dark-pagination [&_.ant-pagination-item]:bg-gray-700 [&_.ant-pagination-item]:border-gray-600 [&_.ant-pagination-item_a]:text-white [&_.ant-pagination-item-active]:bg-gray-800 [&_.ant-pagination-item-active]:border-indigo-600 [&_.ant-pagination-item-active_a]:text-white [&_.ant-pagination-item:hover]:bg-gray-600 [&_.ant-pagination-item-active:hover]:bg-indigo-700 [&_.ant-pagination-prev_button]:text-white [&_.ant-pagination-next_button]:text-white [&_.ant-pagination-disabled_button]:text-gray-500 [&_.ant-pagination-jump-next]:text-white [&_.ant-pagination-jump-prev]:text-white"
-                  : "[&_.ant-pagination-item:hover]:bg-gray-100 [&_.ant-pagination-item-active]:bg-indigo-600 [&_.ant-pagination-item-active]:border-indigo-600 [&_.ant-pagination-item-active_a]:text-white [&_.ant-pagination-item-active:hover]:bg-indigo-700"
-              }`}
-            />
           </div>
         </div>
       </div>
 
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 pointer-events-none">
-          <div className="absolute inset-y-0 right-0 pointer-events-auto">
-            <ProductDetailSidebar
-              product={selectedProduct}
-              onClose={() => setSelectedProduct(null)}
-              onProductUpdate={onProductUpdate}
-            />
-          </div>
-        </div>
+      {/* Course Detail Sidebar Drawer */}
+      {selectedCourse && (
+        <CourseDetailSidebar
+          course={selectedCourse}
+          onClose={handleCloseSidebar}
+        />
       )}
     </>
   );

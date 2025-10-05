@@ -1,23 +1,12 @@
-import { TooltipProps } from "recharts";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
-import { KPI } from "../data/datatype";
+import { ChartData } from "../dashboard/dashboard";
 
-export interface TooltipPayloadItem {
-  value: number;
-  dataKey: string;
-  color: string;
-  payload: KPI;
-  name?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  type?: string;
-}
-
-export interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+export interface CustomTooltipProps {
   active?: boolean;
-  payload?: TooltipPayloadItem[];
+  payload?: Array<{
+    payload: ChartData;
+    value?: number;
+    dataKey?: string;
+    color?: string;
+  }>;
   label?: string;
 }

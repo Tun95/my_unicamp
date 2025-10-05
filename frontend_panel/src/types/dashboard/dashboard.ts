@@ -1,3 +1,30 @@
+// src/types/dashboard/dashboard.ts
+
+export interface Course {
+  _id: string;
+  title: string;
+  university: string;
+  degree_type: string;
+  field_of_study: string;
+  duration: string;
+  fees: string;
+  createdAt: string;
+}
+
+export interface DegreeTypeData {
+  degree_type: string;
+  count: number;
+  percentage: number;
+  avg_tuition: number;
+}
+
+export interface ChartData {
+  name: string;
+  value: number;
+  percentage: number;
+  avg_tuition: number;
+}
+
 export interface DashboardOverview {
   summary: {
     total_courses: number;

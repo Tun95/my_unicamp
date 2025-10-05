@@ -1,39 +1,45 @@
 // ChartComponent.tsx
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
-import { KPI } from "../../../types/data/datatype";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { CustomTooltipProps } from "../../../types/recharts/recharts";
-import { formatDayOnly } from "../../../utilities/utils/Utils";
+import { ChartData } from "../../../types/dashboard/dashboard";
 
 interface ChartComponentProps {
-  data: KPI[];
+  data: ChartData[];
 }
 
 function ChartComponent({ data }: ChartComponentProps) {
   const { theme } = useTheme();
 
-  // Custom tooltip with proper typing
+  const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+
+  // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
+      const dataItem = payload[0].payload as ChartData;
       return (
         <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-md shadow-md">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Date: {new Date(label as string).toLocaleDateString()}
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-semibold">
+            {label}
           </p>
           <p className="text-blue-600 dark:text-blue-400 text-sm">
-            Stock: {payload[0]?.value?.toLocaleString()}
+            Courses: {dataItem.value?.toLocaleString()}
           </p>
           <p className="text-green-600 dark:text-green-400 text-sm">
-            Demand: {payload[1]?.value?.toLocaleString()}
+            Percentage: {dataItem.percentage}%
+          </p>
+          <p className="text-purple-600 dark:text-purple-400 text-sm">
+            Avg Tuition: ${dataItem.avg_tuition?.toLocaleString()}
           </p>
         </div>
       );
@@ -41,27 +47,15 @@ function ChartComponent({ data }: ChartComponentProps) {
     return null;
   };
 
-  // Format Y-axis values
-  const formatYAxis = (value: number) => {
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}k`;
-    }
-    return value.toString();
-  };
-
   return (
-    <div className="w-full h-full p-4 relative right-2">
-      <ResponsiveContainer
-        width="100%"
-        height="100%"
-        style={{ outline: "none" }}
-      >
-        <LineChart
+    <div className="w-full h-full p-4">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
           data={data}
           margin={{
-            top: 5,
-            right: 0,
-            left: -30,
+            top: 20,
+            right: 30,
+            left: 20,
             bottom: 5,
           }}
         >
@@ -70,37 +64,28 @@ function ChartComponent({ data }: ChartComponentProps) {
             stroke={theme === "dark" ? "#374151" : "#e5e7eb"}
           />
           <XAxis
-            dataKey="date"
-            tickFormatter={formatDayOnly}
+            dataKey="name"
             stroke={theme === "dark" ? "#9ca3af" : "#6b7280"}
             fontSize={12}
+            angle={-45}
+            textAnchor="end"
+            height={80}
           />
           <YAxis
             stroke={theme === "dark" ? "#9ca3af" : "#6b7280"}
             fontSize={12}
-            tickFormatter={formatYAxis}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
-          <Line
-            type="monotone"
-            dataKey="stock"
-            stroke="#3b82f6"
-            strokeWidth={1}
-            dot={{ fill: "#3b82f6", strokeWidth: 2, r: 2 }}
-            activeDot={{ r: 4, fill: "#3b82f6" }}
-            name="Stock"
-          />
-          <Line
-            type="monotone"
-            dataKey="demand"
-            stroke="#10b981"
-            strokeWidth={1}
-            dot={{ fill: "#10b981", strokeWidth: 2, r: 2 }}
-            activeDot={{ r: 4, fill: "#10b981" }}
-            name="Demand"
-          />
-        </LineChart>
+          <Bar dataKey="value" name="Number of Courses" radius={[4, 4, 0, 0]}>
+            {data.map((_, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={colors[index % colors.length]}
+              />
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

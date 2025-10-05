@@ -4,15 +4,13 @@ import { Link, NavLink } from "react-router-dom";
 
 import user_image from "../../assets/users.png";
 import Sidebar from "../sidebar/Sidebar";
-import { useDateRange, useTheme } from "../../custom hooks/Hooks";
-import { dateRanges } from "../../types/data/datatype";
+import { useTheme } from "../../custom hooks/Hooks";
 
 function Navbar() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState("");
   const { theme, toggleTheme } = useTheme();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const { selectedDateRange, setSelectedDateRange } = useDateRange();
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside dropdown
@@ -44,26 +42,6 @@ function Navbar() {
               UNICAMP
             </Link>
           </div>
-
-          {/* Date range chips - Desktop only */}
-          <div className="max-900px:hidden flex items-center gap-2">
-            {dateRanges.map((range) => (
-              <button
-                key={range.id}
-                onClick={() => {
-                  console.log("Setting date range to:", range.id);
-                  setSelectedDateRange(range.id);
-                }}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  selectedDateRange === range.id
-                    ? "bg-accent-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                }`}
-              >
-                {range.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Middle section: Search bar */}
@@ -75,7 +53,7 @@ function Navbar() {
             />
             <input
               type="text"
-              placeholder="Search product..."
+              placeholder="Search courses..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 pl-10 pr-4 py-2 rounded-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-gray-300 dark:focus:border-gray-600 text-sm transition-all"
@@ -85,24 +63,6 @@ function Navbar() {
 
         {/* Right section: Theme toggle, profile, and mobile menu */}
         <div className="flex items-center gap-4">
-          {/* Date range chips - Mobile only */}
-          <div className="max-900px:flex hidden items-center gap-1 mr-2">
-            <select
-              value={selectedDateRange}
-              onChange={(e) => {
-                console.log("Select changed to:", e.target.value);
-                setSelectedDateRange(e.target.value);
-              }}
-              className="bg-gray-100 dark:bg-gray-700 outline-none text-gray-700 dark:text-gray-300 text-sm rounded-md px-2 py-1.5 border-none"
-            >
-              {dateRanges.map((range) => (
-                <option key={range.id} value={range.id}>
-                  {range.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
           <button
             onClick={toggleTheme}
             className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
