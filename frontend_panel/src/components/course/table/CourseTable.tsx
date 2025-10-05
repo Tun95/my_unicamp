@@ -15,6 +15,7 @@ interface TableComponentProps {
   loading: boolean;
   onCourseUpdate?: (course: Course) => void;
   totalPages?: number;
+  totalCourses?: number;
 }
 
 function TableComponent({
@@ -24,7 +25,7 @@ function TableComponent({
   fetchCourses,
   loading,
   onCourseUpdate,
-  totalPages = 1,
+  totalCourses = 0,
 }: TableComponentProps) {
   const { theme } = useTheme();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -102,7 +103,10 @@ function TableComponent({
                 <tbody>
                   {courses.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-4 text-sm text-gray-600 dark:text-gray-300 text-center">
+                      <td
+                        colSpan={7}
+                        className="p-4 text-sm text-gray-600 dark:text-gray-300 text-center"
+                      >
                         No courses found.
                       </td>
                     </tr>
@@ -112,52 +116,53 @@ function TableComponent({
                         key={course._id}
                         className={`border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:${
                           theme === "dark" ? "bg-gray-700" : "bg-gray-50"
-                      }`}
-                      onClick={() => handleRowClick(course)}
-                    >
-                      <td className="p-4 text-sm text-gray-900 dark:text-white">
-                        {course.title}
-                      </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        {course.university}
-                      </td>
-                      <td className="p-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
-                            course.degree_type
-                          )}-100 text-${getStatusColor(
-                            course.degree_type
-                          )}-800 dark:bg-${getStatusColor(
-                            course.degree_type
-                          )}-900 dark:text-${getStatusColor(
-                            course.degree_type
-                          )}-200`}
-                        >
-                          {course.degree_type}
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        {course.field_of_study}
-                      </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        {course.duration}
-                      </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        {course.fees}
-                      </td>
-                      <td className="p-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            course.is_active
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                          }`}
-                        >
-                          {course.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  )))}
+                        }`}
+                        onClick={() => handleRowClick(course)}
+                      >
+                        <td className="p-4 text-sm text-gray-900 dark:text-white">
+                          {course.title}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {course.university}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
+                              course.degree_type
+                            )}-100 text-${getStatusColor(
+                              course.degree_type
+                            )}-800 dark:bg-${getStatusColor(
+                              course.degree_type
+                            )}-900 dark:text-${getStatusColor(
+                              course.degree_type
+                            )}-200`}
+                          >
+                            {course.degree_type}
+                          </span>
+                        </td>
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {course.field_of_study}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {course.duration}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {course.fees}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              course.is_active
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            }`}
+                          >
+                            {course.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -232,7 +237,7 @@ function TableComponent({
               <Pagination
                 current={currentPage}
                 pageSize={10}
-                total={courses.length * totalPages} // Approximate total
+                total={totalCourses} // Approximate total
                 onChange={onPageChange}
                 showSizeChanger={false}
                 className={`pagination-custom ${

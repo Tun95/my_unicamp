@@ -29,6 +29,7 @@ function Course() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCourses, setTotalCourses] = useState(0);
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     university: "",
@@ -67,6 +68,7 @@ function Course() {
       setCourses(response.data);
       setTotalPages(response.pagination.total_pages);
       setCurrentPage(response.pagination.current_page);
+      setTotalCourses(response.pagination.total);
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch courses";
@@ -164,7 +166,7 @@ function Course() {
           className={`w-full overflow-hidden ${theme === "dark" ? "dark" : ""}`}
         >
           {/* Header with Add Course Button */}
-          <div className="flex justify-between items-center p-6 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
+          <div className="flex justify-between items-center mb-4 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl">
                 Course Management
@@ -204,6 +206,7 @@ function Course() {
           loading={loading}
           onCourseUpdate={handleCourseUpdate}
           totalPages={totalPages}
+          totalCourses={totalCourses}
         />
 
         {/* Create Course Modal */}
