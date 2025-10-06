@@ -53,10 +53,10 @@ function ChartComponent({ data }: ChartComponentProps) {
         <BarChart
           data={data}
           margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-            bottom: 5,
+            top: 0,
+            right: 0,
+            left: -36,
+            bottom: 0,
           }}
         >
           <CartesianGrid
