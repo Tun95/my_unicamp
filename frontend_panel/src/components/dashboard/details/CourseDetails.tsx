@@ -5,7 +5,9 @@ import { Course } from "../../../types/dashboard/dashboard";
 import { courseService } from "../../../services/courseService";
 import { useState, useEffect } from "react"; // Add useEffect import
 import { toast } from "sonner";
-import { getStatusColor } from "../../../utilities/status/status";
+import {
+  getStatusColorClasses,
+} from "../../../utilities/status/status";
 import { formatDate } from "../../../utilities/utils/Utils";
 
 interface CourseDetailSidebarProps {
@@ -266,15 +268,9 @@ function CourseDetailSidebar({
                       </select>
                     ) : (
                       <span
-                        className={`block w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
+                        className={`block w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClasses(
                           course.degree_type
-                        )}-100 text-${getStatusColor(
-                          course.degree_type
-                        )}-800 dark:bg-${getStatusColor(
-                          course.degree_type
-                        )}-900 dark:text-${getStatusColor(
-                          course.degree_type
-                        )}-200 mt-1`}
+                        )}`}
                       >
                         {course.degree_type}
                       </span>

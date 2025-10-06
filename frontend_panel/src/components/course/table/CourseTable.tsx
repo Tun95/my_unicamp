@@ -4,7 +4,7 @@ import { Pagination } from "antd";
 import { Loader } from "lucide-react";
 import { Course } from "../../../types/dashboard/dashboard";
 import { useTheme } from "../../../custom hooks/Hooks";
-import { getStatusColor } from "../../../utilities/status/status";
+import { getStatusColorClasses } from "../../../utilities/status/status";
 import CourseDetailSidebar from "../../dashboard/details/CourseDetails";
 
 interface TableComponentProps {
@@ -127,15 +127,9 @@ function TableComponent({
                         </td>
                         <td className="p-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusColor(
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClasses(
                               course.degree_type
-                            )}-100 text-${getStatusColor(
-                              course.degree_type
-                            )}-800 dark:bg-${getStatusColor(
-                              course.degree_type
-                            )}-900 dark:text-${getStatusColor(
-                              course.degree_type
-                            )}-200`}
+                            )}`}
                           >
                             {course.degree_type}
                           </span>
@@ -192,15 +186,9 @@ function TableComponent({
                       </h3>
                       <div className="flex flex-col items-end gap-1">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${getStatusColor(
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColorClasses(
                             course.degree_type
-                          )}-100 text-${getStatusColor(
-                            course.degree_type
-                          )}-800 dark:bg-${getStatusColor(
-                            course.degree_type
-                          )}-900 dark:text-${getStatusColor(
-                            course.degree_type
-                          )}-200`}
+                          )}`}
                         >
                           {course.degree_type}
                         </span>
