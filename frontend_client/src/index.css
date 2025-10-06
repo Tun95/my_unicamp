@@ -1,0 +1,22 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@1,2&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=PP+Mori:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white;
+    font-family: "Satoshi", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "PP Mori", sans-serif;
+  }
+}

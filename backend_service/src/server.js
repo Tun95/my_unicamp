@@ -1,4 +1,4 @@
-// backend_service/src/server.js - Updated with cors package
+// backend_service/src/server.js - Express server setup with security, CORS, and rate limiting
 const path = require("path");
 const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
