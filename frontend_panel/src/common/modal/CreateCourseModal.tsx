@@ -442,7 +442,7 @@ function CreateCourseModal({
                   >
                     <option value="per_year">Per Year</option>
                     <option value="per_semester">Per Semester</option>
-                    <option value="total">Total Program</option>
+                    <option value="total_course">Total Program</option>
                   </select>
                 </div>
               </div>
