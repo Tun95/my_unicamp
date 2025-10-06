@@ -1,7 +1,6 @@
 // backend_service/services/aggregation.service.js
 const Course = require("../../models/course.model");
 const logger = require("../../config/logger");
-const { ERROR_MESSAGES } = require("../constants/constants");
 
 class AggregationService {
   // Get comprehensive dashboard overview
@@ -350,4 +349,5 @@ class AggregationService {
   }
 }
 
-module.exports = new AggregationService();
+const aggregationService = new AggregationService();
+module.exports = aggregationService;
