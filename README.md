@@ -193,8 +193,7 @@ NODE_ENV=development
 PORT=5000
 
 # Database configuration
-MONGODB_URI=mongodb+srv://my_uni_camp:my_uni_camp@myunicamp.rx50yua.mongodb.net/my_uni_camp?retryWrites=true&w=majority&appName=myunicamp
-
+MONGODB_URI=
 # Logtail configuration
 LOGTAIL_API_KEY=
 LOGTAIL_ENDPOINT=
