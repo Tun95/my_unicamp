@@ -18,7 +18,7 @@ function CourseScreen() {
         {/* Main content area */}
         <div className="flex-1 ml-64 w-full max-900px:ml-0">
           <Navbar />
-          <main className="p-8 max-900px:p-2 max-480px:p-0">
+          <main className="p-8 max-900px:p-2 ">
             <Course />
           </main>
         </div>

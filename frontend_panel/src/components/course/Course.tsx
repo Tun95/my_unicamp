@@ -191,15 +191,17 @@ function Course() {
           className={`w-full overflow-hidden ${theme === "dark" ? "dark" : ""}`}
         >
           {/* Header with Add Course Button */}
-          <div className="flex justify-between items-center mb-4 pb-2 max-900px:px-4 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl">
-                Course Management
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-2 max-w-3xl text-sm leading-6">
-                Manage all courses, filter by university, degree type, field of
-                study, and more.
-              </p>
+          <div className="flex justify-between items-center mb-4 pb-2 max-900px:px-2 max-480px:px-0 border-b border-gray-200 dark:border-gray-700 gap-4 max-1045px:flex-col max-1045px:items-start">
+            <div className="mb-2 max-480px:mb-1">
+              <div className="content  max-900px:mt-3 max-480px:p-0 max-480px:pb-0">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl">
+                  Course Management
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-2 max-w-3xl text-sm leading-6">
+                  Manage all courses, filter by university, degree type, field
+                  of study, and more.
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <button
@@ -214,34 +216,36 @@ function Course() {
           </div>
         </div>
 
-        <FilterBox
-          onSearchChange={handleSearchChange}
-          onUniversityChange={handleUniversityChange}
-          onDegreeTypeChange={handleDegreeTypeChange}
-          onFieldOfStudyChange={handleFieldOfStudyChange}
-          onLocationChange={handleLocationChange}
-          onStatusChange={handleStatusChange}
-          onClearAllFilters={handleClearAllFilters}
-        />
+        <div className="max-900px:px-2 max-480px:px-0">
+          <FilterBox
+            onSearchChange={handleSearchChange}
+            onUniversityChange={handleUniversityChange}
+            onDegreeTypeChange={handleDegreeTypeChange}
+            onFieldOfStudyChange={handleFieldOfStudyChange}
+            onLocationChange={handleLocationChange}
+            onStatusChange={handleStatusChange}
+            onClearAllFilters={handleClearAllFilters}
+          />
 
-        <TableComponent
-          courses={courses}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          fetchCourses={fetchCourses}
-          loading={loading}
-          onCourseUpdate={handleCourseUpdate}
-          totalPages={totalPages}
-          totalCourses={totalCourses}
-        />
+          <TableComponent
+            courses={courses}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            fetchCourses={fetchCourses}
+            loading={loading}
+            onCourseUpdate={handleCourseUpdate}
+            totalPages={totalPages}
+            totalCourses={totalCourses}
+          />
 
-        {/* Create Course Modal */}
-        <CreateCourseModal
-          isOpen={showCreateCourse}
-          onClose={() => setShowCreateCourse(false)}
-          fetchCourses={fetchCourses}
-          filterOptions={filterOptions}
-        />
+          {/* Create Course Modal */}
+          <CreateCourseModal
+            isOpen={showCreateCourse}
+            onClose={() => setShowCreateCourse(false)}
+            fetchCourses={fetchCourses}
+            filterOptions={filterOptions}
+          />
+        </div>
       </div>
     </div>
   );

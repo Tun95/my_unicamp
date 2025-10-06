@@ -5,9 +5,7 @@ import { Course } from "../../../types/dashboard/dashboard";
 import { courseService } from "../../../services/courseService";
 import { useState, useEffect } from "react"; // Add useEffect import
 import { toast } from "sonner";
-import {
-  getStatusColorClasses,
-} from "../../../utilities/status/status";
+import { getStatusColorClasses } from "../../../utilities/status/status";
 import { formatDate } from "../../../utilities/utils/Utils";
 
 interface CourseDetailSidebarProps {
@@ -146,7 +144,7 @@ function CourseDetailSidebar({
     <div className="fixed inset-0 z-50 pointer-events-none">
       <div className="absolute inset-y-0 right-0 pointer-events-auto">
         <div
-          className={`w-96 h-full shadow-xl max-w-[480px] transition-transform duration-200 ease-in-out ${
+          className={`max-900px:h-[100vh] w-96 h-full shadow-xl max-w-[480px] transition-transform duration-200 ease-in-out ${
             theme === "dark" ? "bg-gray-900" : "bg-white"
           } max-480px:w-full`}
         >
