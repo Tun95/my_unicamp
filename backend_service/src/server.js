@@ -17,7 +17,11 @@ const server = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+    "https://unicamp-three.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -36,7 +40,7 @@ const apiLimiter = rateLimit({
 });
 
 server.use(helmet());
-server.use(cors(corsOptions)); // Use cors package instead of custom middleware
+server.use(cors(corsOptions));
 server.use(morgan("combined"));
 server.use(express.json({ limit: "50mb" }));
 
