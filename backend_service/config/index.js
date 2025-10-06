@@ -9,10 +9,7 @@ module.exports = {
     },
   },
   env: process.env.NODE_ENV || "development",
-  jwt: {
-    secret: process.env.JWT_SECRET || "",
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  },
+
   logtail: {
     apikey: process.env.LOGTAIL_API_KEY || "",
     endpoint: process.env.LOGTAIL_ENDPOINT || "",
