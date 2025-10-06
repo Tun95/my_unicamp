@@ -49,6 +49,7 @@ A full-stack University Course Aggregator system with a modern **React** fronten
 - **Modal System** – Beautiful modals for forms and confirmations
 - **Sidebar Navigation** – Collapsible sidebar with mobile drawer support
 - **Toast Notifications** – Beautiful pop-up messages for user actions
+- **Error Boundary** – raceful 404 error page with user-friendly messaging and navigation options
 
 ### 📊 Dashboard Components
 
@@ -214,4 +215,11 @@ npm run dev       # Start development server with nodemon
 npm start         # Start production server
 npm run seed      # Seed database with sample courses
 npm test          # Run tests
+```
+
+### Repo & Link
+```
+- Github: https://github.com/Tun95/my_unicamp
+
+- Demo Link: https://unicamp-three.vercel.app/
 ```
