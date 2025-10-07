@@ -332,4 +332,5 @@ class CourseController {
   }
 }
 
-module.exports = new CourseController();
+const courseController = new CourseController();
+module.exports = courseController;

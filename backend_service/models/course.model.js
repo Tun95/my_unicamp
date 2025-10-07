@@ -134,4 +134,5 @@ courseSchema.index({ field_of_study: 1 });
 courseSchema.index({ location: 1 });
 courseSchema.index({ is_active: 1 });
 
-module.exports = mongoose.model("Course", courseSchema);
+const Course = mongoose.model("Course", courseSchema);
+module.exports = Course;
