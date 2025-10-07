@@ -28,4 +28,5 @@ class AggregationController {
   }
 }
 
-module.exports = new AggregationController();
+const aggregationController = new AggregationController();
+module.exports = aggregationController;

@@ -203,6 +203,114 @@ class MscCourseController {
       });
     }
   }
+
+  // Get specific MSc course by ID
+  async getMscCourseById(req, res) {
+    try {
+      const { id } = req.params;
+      const course = await courseService.getCourseById(id);
+
+      // Ensure it's an MSc course
+      if (course.degree_type !== "Master") {
+        return sendResponse(res, 400, {
+          status: STATUS.FAILED,
+          message: "This endpoint is for MSc courses only",
+        });
+      }
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: course,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "MscCourseController",
+        method: "getMscCourseById",
+        course_id: req.params.id,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Bulk operations on MSc courses
+  async bulkMscOperations(req, res) {
+    try {
+      const { courseIds, action } = req.body;
+
+      const results = {
+        successful: [],
+        failed: [],
+      };
+
+      for (const courseId of courseIds) {
+        try {
+          let result;
+
+          switch (action) {
+            case "hide":
+            case "unhide":
+              result = await courseService.toggleCourseVisibility(
+                courseId,
+                action
+              );
+              break;
+            case "delete":
+              result = await courseService.permanentDeleteCourse(courseId);
+              break;
+            default:
+              throw new Error(`Unsupported action: ${action}`);
+          }
+
+          results.successful.push({
+            courseId,
+            action,
+            result: result.title || `Course ${courseId}`,
+          });
+        } catch (error) {
+          results.failed.push({
+            courseId,
+            action,
+            error: error.message,
+          });
+        }
+      }
+
+      await logger.info("Bulk MSc operations completed", {
+        controller: "MscCourseController",
+        method: "bulkMscOperations",
+        action,
+        successful: results.successful.length,
+        failed: results.failed.length,
+      });
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        message: `Bulk operation '${action}' completed`,
+        data: results,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "MscCourseController",
+        method: "bulkMscOperations",
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
 }
 
 const mscCourseController = new MscCourseController();

@@ -339,6 +339,219 @@ const toggleCourseVisibilityValidation = [
   handleValidationErrors,
 ];
 
+// Get MSc courses validation
+const getMscCoursesValidation = [
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive integer")
+    .toInt(),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage("Limit must be between 1 and 50")
+    .toInt(),
+  query("search")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Search query too long")
+    .escape(),
+  query("university")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("University filter too long")
+    .escape(),
+  query("department")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Department filter too long")
+    .escape(),
+  query("location")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Location filter too long")
+    .escape(),
+  query("max_fees")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Max fees must be a positive number")
+    .toFloat(),
+  handleValidationErrors,
+];
+
+// Import MSc courses validation
+const importMscCoursesValidation = [
+  body("university")
+    .notEmpty()
+    .withMessage("University name is required")
+    .isString()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("University name must be between 2 and 100 characters")
+    .escape()
+    .custom((value) => {
+      const supportedUniversities = [
+        "university of manchester",
+        "university of edinburgh",
+        "imperial college london",
+        "university of cambridge",
+        "university of oxford",
+      ];
+      if (!supportedUniversities.includes(value.toLowerCase())) {
+        throw new Error(
+          `Currently supported universities: ${supportedUniversities.join(
+            ", "
+          )}`
+        );
+      }
+      return true;
+    }),
+  body("department")
+    .notEmpty()
+    .withMessage("Department is required")
+    .isString()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Department must be between 2 and 100 characters")
+    .escape()
+    .custom((value) => {
+      const validDepartments = [
+        "Computer Science",
+        "Engineering",
+        "Business",
+        "Data Science",
+        "Artificial Intelligence",
+        "Mathematics",
+        "Physics",
+        "Chemistry",
+      ];
+      if (!validDepartments.includes(value)) {
+        throw new Error(
+          `Supported departments: ${validDepartments.join(", ")}`
+        );
+      }
+      return true;
+    }),
+  body("options.overwrite")
+    .optional()
+    .isBoolean()
+    .withMessage("Overwrite option must be a boolean")
+    .toBoolean(),
+  body("options.limit")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("Limit must be between 1 and 100")
+    .toInt(),
+  body("options.delay")
+    .optional()
+    .isInt({ min: 0, max: 10000 })
+    .withMessage("Delay must be between 0 and 10000 milliseconds")
+    .toInt(),
+  handleValidationErrors,
+];
+
+// Compare MSc courses validation
+const compareMscCoursesValidation = [
+  query("courseIds")
+    .notEmpty()
+    .withMessage("Course IDs are required")
+    .custom((value) => {
+      if (typeof value === "string") {
+        value = value.split(",");
+      }
+
+      if (!Array.isArray(value)) {
+        throw new Error(
+          "Course IDs must be an array or comma-separated string"
+        );
+      }
+
+      if (value.length < 2) {
+        throw new Error("At least 2 courses required for comparison");
+      }
+
+      if (value.length > 5) {
+        throw new Error("Maximum 5 courses can be compared at once");
+      }
+
+      // Validate each ID is a valid MongoDB ObjectId
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      for (const id of value) {
+        if (!objectIdRegex.test(id.trim())) {
+          throw new Error(`Invalid course ID format: ${id}`);
+        }
+      }
+
+      return true;
+    })
+    .customSanitizer((value) => {
+      if (typeof value === "string") {
+        return value.split(",").map((id) => id.trim());
+      }
+      return value;
+    }),
+  handleValidationErrors,
+];
+
+// MSc course ID validation (for single operations)
+const mscCourseIdValidation = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid course ID format")
+    .custom(async (value, { req }) => {
+      // Additional validation to ensure it's an MSc course
+      try {
+        const Course = require("../../models/course.model");
+        const course = await Course.findById(value);
+
+        if (!course) {
+          throw new Error("Course not found");
+        }
+
+        if (course.degree_type !== "Master") {
+          throw new Error("This endpoint is for MSc courses only");
+        }
+
+        return true;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }),
+  handleValidationErrors,
+];
+
+// Bulk MSc operations validation
+const bulkMscOperationsValidation = [
+  body("courseIds")
+    .notEmpty()
+    .withMessage("Course IDs are required")
+    .isArray({ min: 1 })
+    .withMessage("Course IDs must be a non-empty array")
+    .custom((value) => {
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      for (const id of value) {
+        if (!objectIdRegex.test(id)) {
+          throw new Error(`Invalid course ID format: ${id}`);
+        }
+      }
+      return true;
+    }),
+  body("action")
+    .notEmpty()
+    .withMessage("Action is required")
+    .isIn(["hide", "unhide", "delete"])
+    .withMessage("Action must be one of: hide, unhide, delete"),
+  handleValidationErrors,
+];
+
 module.exports = {
   idValidation,
   getCoursesValidation,
@@ -348,5 +561,12 @@ module.exports = {
   createCourseValidation,
   updateCourseValidation,
   toggleCourseVisibilityValidation,
+
+  getMscCoursesValidation,
+  importMscCoursesValidation,
+  compareMscCoursesValidation,
+  mscCourseIdValidation,
+  bulkMscOperationsValidation,
+
   handleValidationErrors,
 };
