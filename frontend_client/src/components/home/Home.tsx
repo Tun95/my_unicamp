@@ -41,7 +41,7 @@ const Home = () => {
 
       {/* Main Content */}
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-8 max-900px:px-4 py-12">
+        <div className="container mx-auto px-8 max-900px:px-4 py-12 max-480px:py-6 max-480px:px-2 max-w-7xl ">
           {/* Filter Section */}
           <FilterBox onFilterChange={handleFilterChange} />
 

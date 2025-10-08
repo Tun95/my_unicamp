@@ -35,7 +35,7 @@ const FeaturedCourses = ({ courses }: FeaturedCoursesProps) => {
 
   return (
     <section className="py-10 pt-0 bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-8 max-900px:px-4">
+      <div className="container mx-auto px-8 max-900px:px-4 max-900px:px-4 max-480px:py-6 max-480px:px-2 max-w-7xl">
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -105,7 +105,7 @@ const FeaturedCourses = ({ courses }: FeaturedCoursesProps) => {
           {/* Custom Navigation Buttons */}
           <button
             ref={navigationPrevRef}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="max-480px:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Previous slide"
             onClick={() => swiperRef.current?.slidePrev()}
           >
@@ -117,7 +117,7 @@ const FeaturedCourses = ({ courses }: FeaturedCoursesProps) => {
 
           <button
             ref={navigationNextRef}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="max-480px:hidden absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Next slide"
             onClick={() => swiperRef.current?.slideNext()}
           >
