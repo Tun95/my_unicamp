@@ -88,7 +88,7 @@ const Courses = () => {
           resultsCount={filteredCourses.length}
         />
 
-        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-0 ">
+        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-w-7xl ">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
             <div className="lg:w-80 flex-shrink-0">

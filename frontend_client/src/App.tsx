@@ -9,9 +9,12 @@ import CourseScreen from "./screens/coursescreen/CourseScreen";
 import HomeScreen from "./screens/homescreen/HomeScreen";
 import Footer from "./common/footer/Footer";
 import CourseDetailScreen from "./screens/coursescreen/CourseDetailScreen";
+import useScrollToTop from "./utilities/scroll to top/ScrollToTop";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+
+  useScrollToTop();
 
   useEffect(() => {
     const timer = setTimeout(() => {

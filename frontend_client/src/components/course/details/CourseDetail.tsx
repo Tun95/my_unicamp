@@ -19,6 +19,7 @@ import ContactSection from "./sections/ContactSection";
 import IntakeSection from "./sections/IntakeSection";
 import RelatedCourses from "./sections/RelatedCourses";
 import { dummyCourses } from "../../../data/dummyCourses";
+import { toast } from "sonner";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,11 +29,9 @@ const CourseDetail = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
-    // Simulate API call
     const fetchCourse = async () => {
       setIsLoading(true);
       try {
-        // Simulate network delay
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         const foundCourse = dummyCourses.find((c) => c._id === id);
@@ -50,7 +49,6 @@ const CourseDetail = () => {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    // Here you would typically make an API call to save/remove bookmark
   };
 
   const handleShare = async () => {
@@ -67,8 +65,7 @@ const CourseDetail = () => {
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      // You could show a toast notification here
-      alert("Link copied to clipboard!");
+      toast.success("Link copied to clipboard!");
     }
   };
 
@@ -154,7 +151,7 @@ const CourseDetail = () => {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-8 max-900px:px-4 py-8">
+        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-8">
