@@ -9,7 +9,7 @@ import {
   Calendar,
   Award,
 } from "lucide-react";
-import { Link, NavLink, } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import user_image from "../../assets/users.png";
 import Sidebar from "../sidebar/Sidebar";
@@ -46,36 +46,35 @@ function Navbar() {
   return (
     <>
       <header className="header sticky top-0 h-16 flex items-center justify-between px-8 max-900px:px-4 max-480px:px-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-all z-20">
-        {/* Left section: Logo and navigation links */}
-        <div className="flex items-center gap-8">
-          {/* Logo */}
+        {/* Left section: Logo */}
+        <div className="flex items-center">
           <Link
             to="/"
             className="font-display text-xl font-semibold text-gray-900 dark:text-white"
           >
             UNICAMP
           </Link>
-
-          {/* Navigation Links - Hidden on mobile */}
-          <nav className="max-900px:hidden flex items-center gap-6">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-900 dark:hover:text-white ${
-                    isActive
-                      ? "text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-gray-400"
-                  }`
-                }
-              >
-                <item.icon size={16} />
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
         </div>
+
+        {/* Center section: Navigation links */}
+        <nav className="max-900px:hidden flex items-center gap-8">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-900 dark:hover:text-white ${
+                  isActive
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-400"
+                }`
+              }
+            >
+              <item.icon size={16} />
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
         {/* Right section: Theme toggle, profile, and mobile menu */}
         <div className="flex items-center gap-4">
