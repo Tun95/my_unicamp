@@ -1,6 +1,7 @@
 import { Filter, X } from "lucide-react";
-import { useState } from "react";
-import { CourseFilters } from "../../../types/course/course";
+import { useState, useRef } from "react";
+import { CourseFilters } from "../../../../types/course/course";
+import { useClickOutside } from "../../../../custom hooks/Hooks";
 
 interface CoursesFilterProps {
   filters: CourseFilters;
@@ -16,6 +17,14 @@ const CoursesFilter = ({
   hasActiveFilters,
 }: CoursesFilterProps) => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const mobileFiltersRef = useRef<HTMLDivElement>(null);
+
+  // Close mobile filters when clicking outside
+  useClickOutside(mobileFiltersRef, () => {
+    if (isMobileFiltersOpen) {
+      setIsMobileFiltersOpen(false);
+    }
+  });
 
   const filterOptions = {
     degree_type: [
@@ -271,41 +280,63 @@ const CoursesFilter = ({
 
       {/* Mobile Filters Overlay */}
       {isMobileFiltersOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
-          <div className="absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-xl overflow-y-auto">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Filters
-                </h2>
-                <button
-                  onClick={() => setIsMobileFiltersOpen(false)}
-                  className="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                >
-                  <X size={20} />
-                </button>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden"
+          onClick={() => setIsMobileFiltersOpen(false)}
+        >
+          {/* Filter Drawer */}
+          <div
+            ref={mobileFiltersRef}
+            className="absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header - Fixed */}
+            <div className="flex-shrink-0">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Filters
+                  </h2>
+                  <button
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                    aria-label="Close filters"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="p-4">
-              <FilterContent />
-              <div className="mt-6 space-y-3">
-                <button
-                  onClick={() => setIsMobileFiltersOpen(false)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
-                >
-                  Show Results
-                </button>
-                {hasActiveFilters && (
+
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 pb-0">
+                <FilterContent />
+              </div>
+            </div>
+
+            {/* Footer - Fixed */}
+            <div className="flex-shrink-0">
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <div className="space-y-3">
                   <button
-                    onClick={() => {
-                      onClearAll();
-                      setIsMobileFiltersOpen(false);
-                    }}
-                    className="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 rounded-lg font-medium transition-colors"
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
                   >
-                    Clear All Filters
+                    Show Results
                   </button>
-                )}
+                  {hasActiveFilters && (
+                    <button
+                      onClick={() => {
+                        onClearAll();
+                        setIsMobileFiltersOpen(false);
+                      }}
+                      className="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 rounded-lg font-medium transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

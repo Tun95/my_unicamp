@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Grid, List } from "lucide-react";
 import CoursesFilter from "./sections/CoursesFilter";
-import CourseCard from "../../common/course card/CourseCard";
+import CourseCard from "../../../common/course card/CourseCard";
 import CoursesHeader from "./sections/CoursesHeader";
-import { Course, CourseFilters } from "../../types/course/course";
-import { dummyCourses } from "../../data/dummyCourses";
+import { Course, CourseFilters } from "../../../types/course/course";
+import { dummyCourses } from "../../../data/dummyCourses";
 
 type ViewMode = "grid" | "list";
 
@@ -88,7 +88,7 @@ const Courses = () => {
           resultsCount={filteredCourses.length}
         />
 
-        <div className="container mx-auto px-8 max-900px:px-4 py-8">
+        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-0 ">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
             <div className="lg:w-80 flex-shrink-0">

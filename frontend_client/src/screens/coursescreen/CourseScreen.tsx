@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import Navbar from "../../common/navbar/Navbar";
-import Courses from "../../components/course/Courses";
+import Courses from "../../components/course/list/Courses";
 
 function CourseScreen() {
   return (
