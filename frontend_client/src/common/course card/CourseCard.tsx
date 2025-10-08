@@ -4,9 +4,10 @@ import { Course } from "../../types/course/course";
 
 interface CourseCardProps {
   course: Course;
+  variant?: "grid" | "list";
 }
 
-const CourseCard = ({ course }: CourseCardProps) => {
+const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -49,6 +50,89 @@ const CourseCard = ({ course }: CourseCardProps) => {
     );
   };
 
+  if (variant === "list") {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="p-6">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+            {/* Left Content */}
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
+                    {course.title}
+                  </h3>
+                  <p className="text-lg font-medium text-blue-600 dark:text-blue-400 mb-3">
+                    {course.university}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getDegreeColor(
+                      course.degree_type
+                    )}`}
+                  >
+                    {course.degree_type}
+                  </span>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                    {getFeeDisplay(course.tuition_fee)}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                {course.description}
+              </p>
+
+              {/* Course Details Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={16} className="flex-shrink-0" />
+                  <span className="line-clamp-1">{course.field_of_study}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} className="flex-shrink-0" />
+                  <span className="line-clamp-1">{course.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="flex-shrink-0" />
+                  <span className="line-clamp-1">{course.duration}</span>
+                </div>
+                {course.intake_months.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} className="flex-shrink-0" />
+                    <span className="line-clamp-1">
+                      {course.intake_months.join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Action */}
+            <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 lg:gap-4 lg:text-right">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {course.application_deadline && (
+                  <div className="whitespace-nowrap">
+                    Apply by{" "}
+                    {new Date(course.application_deadline).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <Link
+                to={`/courses/${course._id}`}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap"
+              >
+                View Details
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Grid View (original implementation)
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-full">
       {/* Header with University and Degree Badge */}

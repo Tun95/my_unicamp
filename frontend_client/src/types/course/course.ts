@@ -34,3 +34,13 @@ export interface Course {
   contact_email?: string;
   is_active: boolean;
 }
+
+export interface CourseFilters {
+  degree_type: string;
+  field_of_study: string;
+  location: string;
+  duration: string;
+  intake_month: string;
+  min_tuition: string;
+  max_tuition: string;
+}

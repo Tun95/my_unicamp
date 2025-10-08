@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import Navbar from "../../common/navbar/Navbar";
+import Courses from "../../components/course/Courses";
 
 function CourseScreen() {
   return (
@@ -13,7 +14,7 @@ function CourseScreen() {
 
         {/* Main content area */}
         <main className="p-8 max-900px:p-4 max-480px:p-2">
-          {/* Your courses content goes here */}
+          <Courses />
         </main>
       </div>
     </div>
