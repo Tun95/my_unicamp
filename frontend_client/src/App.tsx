@@ -7,6 +7,7 @@ import LoadingBox from "./utilities/message loading/LoadingBox";
 import ErrorBoundary from "./utilities/error boundary/ErrorBoundary";
 import CourseScreen from "./screens/coursescreen/CourseScreen";
 import HomeScreen from "./screens/homescreen/HomeScreen";
+import Footer from "./common/footer/Footer";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/courses" element={<CourseScreen />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
