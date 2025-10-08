@@ -7,7 +7,7 @@ interface ContactSectionProps {
 
 const ContactSection = ({ website, email }: ContactSectionProps) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 max-480px:p-4">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         Contact Information
       </h3>

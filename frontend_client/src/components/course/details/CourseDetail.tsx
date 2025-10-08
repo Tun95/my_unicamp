@@ -151,7 +151,7 @@ const CourseDetail = () => {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-w-7xl">
+        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-480px:pb-0 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-8">
@@ -171,7 +171,7 @@ const CourseDetail = () => {
             {/* Right Column - Sidebar */}
             <div className="space-y-6">
               {/* Quick Facts */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 max-480px:p-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Quick Facts
                 </h3>

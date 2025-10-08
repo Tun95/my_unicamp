@@ -7,7 +7,7 @@ interface RequirementsSectionProps {
 
 const RequirementsSection = ({ requirements }: RequirementsSectionProps) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
         Entry Requirements
       </h2>

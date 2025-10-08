@@ -52,7 +52,7 @@ const TuitionSection = ({ tuitionFee }: TuitionSectionProps) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
         <DollarSign size={24} className="text-green-600" />
         Tuition & Fees
