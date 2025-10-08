@@ -8,6 +8,7 @@ import ErrorBoundary from "./utilities/error boundary/ErrorBoundary";
 import CourseScreen from "./screens/coursescreen/CourseScreen";
 import HomeScreen from "./screens/homescreen/HomeScreen";
 import Footer from "./common/footer/Footer";
+import CourseDetailScreen from "./screens/coursescreen/CourseDetailScreen";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +36,7 @@ function App() {
         <Route path="*" element={<ErrorBoundary />} />
         <Route path="/" element={<HomeScreen />} />
         <Route path="/courses" element={<CourseScreen />} />
+        <Route path="/courses/:id" element={<CourseDetailScreen />} />
       </Routes>
       <Footer />
     </div>
