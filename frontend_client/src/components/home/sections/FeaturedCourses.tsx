@@ -10,12 +10,15 @@ import "swiper/css/pagination";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
+import { useNavigate } from "react-router-dom";
 
 interface FeaturedCoursesProps {
   courses: Course[];
 }
 
 const FeaturedCourses = ({ courses }: FeaturedCoursesProps) => {
+  const navigate = useNavigate();
+
   const featuredCourses = courses.slice(0, 6);
   const navigationPrevRef = useRef<HTMLButtonElement>(null);
   const navigationNextRef = useRef<HTMLButtonElement>(null);
@@ -133,7 +136,10 @@ const FeaturedCourses = ({ courses }: FeaturedCoursesProps) => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <button className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+          <button
+            onClick={() => navigate("/courses")}
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+          >
             View All Courses
           </button>
         </div>
