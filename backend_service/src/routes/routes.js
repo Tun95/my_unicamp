@@ -9,11 +9,6 @@ const {
   updateCourseValidation,
   toggleCourseVisibilityValidation,
   getAdminCoursesValidation,
-  getMscCoursesValidation,
-  compareMscCoursesValidation,
-  importMscCoursesValidation,
-  mscCourseIdValidation,
-  bulkMscOperationsValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -59,30 +54,22 @@ setupRoutes = (server) => {
     .route("/api/admin/dashboard/overview")
     .get(aggregationController.getDashboardOverview);
 
-  // MSc Course Routes
-  server
-    .route("/api/msc-courses")
-    .get(getMscCoursesValidation, mscCourseController.getMscCourses);
-
-  server
-    .route("/api/msc-courses/filters")
-    .get(mscCourseController.getMscFilterOptions);
-
-  server
-    .route("/api/msc-courses/compare")
-    .get(compareMscCoursesValidation, mscCourseController.compareMscCourses);
-
+  // MSc Course Import Routes
   server
     .route("/api/admin/msc-courses/import")
-    .post(importMscCoursesValidation, mscCourseController.importMscCourses);
+    .post(mscCourseController.importMScCourses);
 
   server
-    .route("/api/msc-courses/:id")
-    .get(mscCourseIdValidation, mscCourseController.getMscCourseById);
+    .route("/api/admin/msc-courses/search")
+    .get(mscCourseController.searchMScCourses);
 
   server
-    .route("/api/admin/msc-courses/bulk")
-    .post(bulkMscOperationsValidation, mscCourseController.bulkMscOperations);
+    .route("/api/admin/msc-courses/verify-university")
+    .get(mscCourseController.verifyUKUniversity);
+
+  server
+    .route("/api/admin/msc-courses/test-provider")
+    .post(mscCourseController.testSearchProvider);
 
   server.get("/health", async (req, res) => {
     res.status(200).json({ status: HEALTH_STATUS.UP });

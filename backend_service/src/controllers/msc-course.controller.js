@@ -1,104 +1,25 @@
 // backend_service/src/controllers/msc-course.controller.js
-const courseService = require("../services/course.service");
-const dataImportService = require("../services/data-import.service");
+const mscCoursesService = require("../services/msc-course.service");
 const { sendResponse } = require("../utils/utils");
 const { STATUS, ERROR_MESSAGES } = require("../constants/constants");
 const logger = require("../../config/logger");
 
 class MscCourseController {
-  // Get MSc courses with department filtering
-  async getMscCourses(req, res) {
+  // Import MSc courses for a specific university and department
+  async importMScCourses(req, res) {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        university,
-        department,
-        location,
-        max_fees,
-      } = req.query;
+      const { university, department } = req.body;
+      const options = req.body.options || {};
 
-      // Build enhanced query for MSc courses
-      let query = {
-        is_active: true,
-        degree_type: "Master",
-      };
-
-      // Search across multiple fields
-      if (search) {
-        query.$or = [
-          { title: { $regex: search, $options: "i" } },
-          { university: { $regex: search, $options: "i" } },
-          { field_of_study: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ];
-      }
-
-      // Filter by university
-      if (university) {
-        query.university = { $regex: university, $options: "i" };
-      }
-
-      // Filter by department (field_of_study)
-      if (department) {
-        query.field_of_study = { $regex: department, $options: "i" };
-      }
-
-      // Filter by location
-      if (location) {
-        query.location = { $regex: location, $options: "i" };
-      }
-
-      // Filter by maximum fees
-      if (max_fees) {
-        query["tuition_fee.amount"] = { $lte: parseFloat(max_fees) };
-      }
-
-      const courses = await courseService.getCourses({
-        page: parseInt(page),
-        limit: parseInt(limit),
-        query, // Pass custom query
-      });
-
-      return sendResponse(res, 200, {
-        status: STATUS.SUCCESS,
-        data: courses.courses,
-        pagination: courses.pagination,
-        filters: {
-          search,
-          university,
-          department,
-          location,
-          max_fees,
-        },
-      });
-    } catch (error) {
-      await logger.error(error, {
-        controller: "MscCourseController",
-        method: "getMscCourses",
-      });
-
-      return sendResponse(res, 500, {
-        status: STATUS.FAILED,
-        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      });
-    }
-  }
-
-  // Import MSc courses from external source
-  async importMscCourses(req, res) {
-    try {
-      const { university, department, options = {} } = req.body;
-
+      // Validate required fields
       if (!university || !department) {
         return sendResponse(res, 400, {
           status: STATUS.FAILED,
-          message: "University and department are required",
+          message: "University and department are required fields",
         });
       }
 
-      const importResult = await dataImportService.importMScCourses(
+      const importResults = await mscCoursesService.importMScCourses(
         university,
         department,
         options
@@ -106,133 +27,54 @@ class MscCourseController {
 
       return sendResponse(res, 200, {
         status: STATUS.SUCCESS,
-        message: "MSc courses import completed",
-        data: importResult,
+        message: `Successfully imported ${importResults.created} courses for ${department} at ${university}`,
+        data: importResults,
+        summary: {
+          university,
+          department,
+          total_attempted:
+            importResults.created +
+            importResults.skipped +
+            importResults.errors.length,
+          successfully_imported: importResults.created,
+          skipped_duplicates: importResults.skipped,
+          errors: importResults.errors.length,
+        },
       });
     } catch (error) {
       await logger.error(error, {
         controller: "MscCourseController",
-        method: "importMscCourses",
+        method: "importMScCourses",
+        university: req.body?.university,
+        department: req.body?.department,
       });
 
-      return sendResponse(res, 500, {
-        status: STATUS.FAILED,
-        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      });
-    }
-  }
-
-  // Compare multiple MSc courses
-  async compareMscCourses(req, res) {
-    try {
-      const { courseIds } = req.query;
-
-      if (!courseIds || !Array.isArray(courseIds)) {
+      if (error.message.includes("not a recognized UK university")) {
         return sendResponse(res, 400, {
           status: STATUS.FAILED,
-          message: "Course IDs array is required",
+          message: error.message,
+          suggestion:
+            "Please verify the university name and ensure it's a UK institution",
         });
       }
 
-      const comparisonData = await Promise.all(
-        courseIds.map((id) => courseService.getCourseById(id))
-      );
-
-      // Structure data for comparison view
-      const comparison = {
-        courses: comparisonData,
-        comparison_fields: [
-          "title",
-          "university",
-          "duration",
-          "fees",
-          "tuition_fee",
-          "entry_requirements",
-          "intake_months",
-          "location",
-        ],
-      };
-
-      return sendResponse(res, 200, {
-        status: STATUS.SUCCESS,
-        data: comparison,
-      });
-    } catch (error) {
-      await logger.error(error, {
-        controller: "MscCourseController",
-        method: "compareMscCourses",
-      });
-
-      return sendResponse(res, 500, {
-        status: STATUS.FAILED,
-        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      });
-    }
-  }
-
-  // Get MSc-specific filter options
-  async getMscFilterOptions(req, res) {
-    try {
-      const filterOptions = await courseService.getFilterOptions();
-
-      // Enhance with MSc-specific options
-      const mscFilterOptions = {
-        ...filterOptions,
-        departments: await dataImportService.getUniqueDepartments(),
-        study_modes: ["Full-time", "Part-time", "Distance learning"],
-        fee_ranges: [
-          { label: "Under £10,000", min: 0, max: 10000 },
-          { label: "£10,000 - £20,000", min: 10000, max: 20000 },
-          { label: "Over £20,000", min: 20000, max: 999999 },
-        ],
-      };
-
-      return sendResponse(res, 200, {
-        status: STATUS.SUCCESS,
-        data: mscFilterOptions,
-      });
-    } catch (error) {
-      await logger.error(error, {
-        controller: "MscCourseController",
-        method: "getMscFilterOptions",
-      });
-
-      return sendResponse(res, 500, {
-        status: STATUS.FAILED,
-        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      });
-    }
-  }
-
-  // Get specific MSc course by ID
-  async getMscCourseById(req, res) {
-    try {
-      const { id } = req.params;
-      const course = await courseService.getCourseById(id);
-
-      // Ensure it's an MSc course
-      if (course.degree_type !== "Master") {
-        return sendResponse(res, 400, {
-          status: STATUS.FAILED,
-          message: "This endpoint is for MSc courses only",
-        });
-      }
-
-      return sendResponse(res, 200, {
-        status: STATUS.SUCCESS,
-        data: course,
-      });
-    } catch (error) {
-      await logger.error(error, {
-        controller: "MscCourseController",
-        method: "getMscCourseById",
-        course_id: req.params.id,
-      });
-
-      if (error.message === "COURSE_NOT_FOUND") {
+      if (error.message.includes("No MSc courses found")) {
         return sendResponse(res, 404, {
           status: STATUS.FAILED,
-          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+          message: error.message,
+          suggestion:
+            "Try different search terms or check if the department offers MSc programs",
+        });
+      }
+
+      if (
+        error.message.includes("search failed") ||
+        error.message.includes("timeout")
+      ) {
+        return sendResponse(res, 503, {
+          status: STATUS.FAILED,
+          message: "Course search services are temporarily unavailable",
+          error: error.message,
         });
       }
 
@@ -243,71 +85,227 @@ class MscCourseController {
     }
   }
 
-  // Bulk operations on MSc courses
-  async bulkMscOperations(req, res) {
+  // Verify if a university is a recognized UK institution
+  async verifyUKUniversity(req, res) {
     try {
-      const { courseIds, action } = req.body;
+      const { university } = req.query;
 
-      const results = {
-        successful: [],
-        failed: [],
-      };
+      if (!university) {
+        return sendResponse(res, 400, {
+          status: STATUS.FAILED,
+          message: "University name is required",
+        });
+      }
 
-      for (const courseId of courseIds) {
-        try {
-          let result;
+      const isUKUniversity = await mscCoursesService.verifyUKUniversity(
+        university
+      );
 
-          switch (action) {
-            case "hide":
-            case "unhide":
-              result = await courseService.toggleCourseVisibility(
-                courseId,
-                action
-              );
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: {
+          university,
+          is_uk_university: isUKUniversity,
+          verified: isUKUniversity,
+        },
+        message: isUKUniversity
+          ? `${university} is a recognized UK university`
+          : `${university} is not recognized as a UK university`,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "MscCourseController",
+        method: "verifyUKUniversity",
+        university: req.query?.university,
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Search for courses across multiple providers without importing
+  async searchMScCourses(req, res) {
+    try {
+      const { university, department, provider } = req.query;
+
+      if (!university || !department) {
+        return sendResponse(res, 400, {
+          status: STATUS.FAILED,
+          message: "University and department are required fields",
+        });
+      }
+
+      let courses = [];
+      let searchProvider = "multiple";
+
+      // Search via specific provider if specified
+      if (provider) {
+        switch (provider.toLowerCase()) {
+          case "ucas":
+            courses = await mscCoursesService.searchViaUCAS(
+              university,
+              department
+            );
+            searchProvider = "UCAS";
+            break;
+          case "hedd":
+            courses = await mscCoursesService.searchViaHEDD(
+              university,
+              department
+            );
+            searchProvider = "HEDD";
+            break;
+          case "website":
+            courses = await mscCoursesService.searchViaUniversityWebsite(
+              university,
+              department
+            );
+            searchProvider = "University Website";
+            break;
+          default:
+            return sendResponse(res, 400, {
+              status: STATUS.FAILED,
+              message:
+                "Invalid provider. Available providers: ucas, hedd, website",
+            });
+        }
+      } else {
+        // Search across all providers
+        for (const searchProviderFunc of mscCoursesService.courseSearchProviders) {
+          try {
+            const results = await searchProviderFunc(university, department);
+            if (results && results.length > 0) {
+              courses = results;
+              searchProvider = searchProviderFunc.name || "auto-detected";
               break;
-            case "delete":
-              result = await courseService.permanentDeleteCourse(courseId);
-              break;
-            default:
-              throw new Error(`Unsupported action: ${action}`);
+            }
+          } catch (error) {
+            continue; // Try next provider
           }
-
-          results.successful.push({
-            courseId,
-            action,
-            result: result.title || `Course ${courseId}`,
-          });
-        } catch (error) {
-          results.failed.push({
-            courseId,
-            action,
-            error: error.message,
-          });
         }
       }
 
-      await logger.info("Bulk MSc operations completed", {
-        controller: "MscCourseController",
-        method: "bulkMscOperations",
-        action,
-        successful: results.successful.length,
-        failed: results.failed.length,
-      });
-
       return sendResponse(res, 200, {
         status: STATUS.SUCCESS,
-        message: `Bulk operation '${action}' completed`,
-        data: results,
+        data: courses,
+        meta: {
+          university,
+          department,
+          provider: searchProvider,
+          count: courses.length,
+          search_performed: new Date().toISOString(),
+        },
+        message:
+          courses.length > 0
+            ? `Found ${courses.length} MSc courses in ${department} at ${university}`
+            : `No MSc courses found in ${department} at ${university}`,
       });
     } catch (error) {
       await logger.error(error, {
         controller: "MscCourseController",
-        method: "bulkMscOperations",
+        method: "searchMScCourses",
+        university: req.query?.university,
+        department: req.query?.department,
+        provider: req.query?.provider,
       });
+
+      if (error.message.includes("search failed")) {
+        return sendResponse(res, 503, {
+          status: STATUS.FAILED,
+          message: "Search service temporarily unavailable",
+          error: error.message,
+        });
+      }
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
         message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Test a specific search provider
+  async testSearchProvider(req, res) {
+    try {
+      const { university, department, provider } = req.body;
+
+      if (!university || !department || !provider) {
+        return sendResponse(res, 400, {
+          status: STATUS.FAILED,
+          message: "University, department, and provider are required fields",
+        });
+      }
+
+      let courses = [];
+      let providerName = "";
+
+      switch (provider.toLowerCase()) {
+        case "ucas":
+          courses = await mscCoursesService.searchViaUCAS(
+            university,
+            department
+          );
+          providerName = "UCAS";
+          break;
+        case "hedd":
+          courses = await mscCoursesService.searchViaHEDD(
+            university,
+            department
+          );
+          providerName = "HEDD";
+          break;
+        case "website":
+          courses = await mscCoursesService.searchViaUniversityWebsite(
+            university,
+            department
+          );
+          providerName = "University Website";
+          break;
+        case "google":
+          courses = await mscCoursesService.searchViaGooglePrograms(
+            university,
+            department
+          );
+          providerName = "Google Programs";
+          break;
+        default:
+          return sendResponse(res, 400, {
+            status: STATUS.FAILED,
+            message:
+              "Invalid provider. Available providers: ucas, hedd, website, google",
+          });
+      }
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: {
+          provider: providerName,
+          courses,
+          test_results: {
+            university,
+            department,
+            courses_found: courses.length,
+            success_rate: courses.length > 0 ? "HIGH" : "LOW",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        message: `Tested ${providerName} provider: Found ${courses.length} courses`,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "MscCourseController",
+        method: "testSearchProvider",
+        university: req.body?.university,
+        department: req.body?.department,
+        provider: req.body?.provider,
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: `Provider test failed: ${error.message}`,
       });
     }
   }
