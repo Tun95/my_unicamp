@@ -1,3 +1,4 @@
+// PARENT COMPONENT
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -18,26 +19,34 @@ import TuitionSection from "./sections/TuitionSection";
 import ContactSection from "./sections/ContactSection";
 import IntakeSection from "./sections/IntakeSection";
 import RelatedCourses from "./sections/RelatedCourses";
-import { dummyCourses } from "../../../data/dummyCourses";
+import { courseService } from "../../../services/courseService";
 import { toast } from "sonner";
 
 const CourseDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!slug) {
+        setError("Course slug is required");
+        setIsLoading(false);
+        return;
+      }
 
-        const foundCourse = dummyCourses.find((c) => c._id === id);
-        setCourse(foundCourse || null);
-      } catch (error) {
-        console.error("Error fetching course:", error);
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const courseData = await courseService.getCourseBySlug(slug);
+        setCourse(courseData);
+      } catch (err) {
+        console.error("Error fetching course:", err);
+        setError(err instanceof Error ? err.message : "Failed to load course");
         setCourse(null);
       } finally {
         setIsLoading(false);
@@ -45,10 +54,13 @@ const CourseDetail = () => {
     };
 
     fetchCourse();
-  }, [id]);
+  }, [slug]);
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+    toast.success(
+      isBookmarked ? "Removed from bookmarks" : "Added to bookmarks"
+    );
   };
 
   const handleShare = async () => {
@@ -72,20 +84,26 @@ const CourseDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading course details...
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (!course) {
+  if (error || !course) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Course Not Found
+            {error ? "Error Loading Course" : "Course Not Found"}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            The course you're looking for doesn't exist or has been removed.
+            {error ||
+              "The course you're looking for doesn't exist or has been removed."}
           </p>
           <Link
             to="/courses"
@@ -222,7 +240,7 @@ const CourseDetail = () => {
                         Location
                       </p>
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {course.location}
+                        {course.location.city}, {course.location.country}
                       </p>
                     </div>
                   </div>
@@ -299,7 +317,7 @@ const CourseDetail = () => {
 
           {/* Related Courses */}
           <div className="mt-16">
-            <RelatedCourses currentCourseId={course._id} />
+            <RelatedCourses currentCourseSlug={course.slug} />
           </div>
         </div>
       </div>

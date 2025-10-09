@@ -30,7 +30,7 @@ const CourseOverview = ({ course }: CourseOverviewProps) => {
     {
       icon: MapPin,
       label: "Location",
-      value: course.location,
+      value: `${course.location.city}, ${course.location.country}`,
       color: "text-purple-600 dark:text-purple-400",
     },
     {

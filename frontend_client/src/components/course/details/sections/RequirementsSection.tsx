@@ -2,10 +2,23 @@ import { CheckCircle, Star, Users, BookOpen } from "lucide-react";
 import { EntryRequirements } from "../../../../types/course/course";
 
 interface RequirementsSectionProps {
-  requirements: EntryRequirements;
+  requirements?: EntryRequirements;
 }
 
 const RequirementsSection = ({ requirements }: RequirementsSectionProps) => {
+  if (!requirements) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Entry Requirements
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          No specific entry requirements listed for this course.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -32,27 +45,28 @@ const RequirementsSection = ({ requirements }: RequirementsSectionProps) => {
               </div>
             )}
 
-            {requirements.prerequisites.length > 0 && (
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                  Prerequisites
-                </h4>
-                <ul className="space-y-2">
-                  {requirements.prerequisites.map((prereq, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center gap-2 text-gray-700 dark:text-gray-300"
-                    >
-                      <CheckCircle
-                        size={16}
-                        className="text-green-500 flex-shrink-0"
-                      />
-                      {prereq}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {requirements.prerequisites &&
+              requirements.prerequisites.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    Prerequisites
+                  </h4>
+                  <ul className="space-y-2">
+                    {requirements.prerequisites.map((prereq, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300"
+                      >
+                        <CheckCircle
+                          size={16}
+                          className="text-green-500 flex-shrink-0"
+                        />
+                        {prereq}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
           </div>
         </div>
 
@@ -64,24 +78,31 @@ const RequirementsSection = ({ requirements }: RequirementsSectionProps) => {
           </h3>
 
           <div className="space-y-4">
-            {requirements.language_tests.map((test, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {test.test_type}
-                  </span>
-                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium">
-                    {test.minimum_score}
-                  </span>
+            {requirements.language_tests &&
+            requirements.language_tests.length > 0 ? (
+              requirements.language_tests.map((test, index) => (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {test.test_type}
+                    </span>
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium">
+                      {test.minimum_score}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Minimum required score for admission
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Minimum required score for admission
-                </p>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                No specific language requirements listed.
+              </p>
+            )}
           </div>
 
           {/* Additional Requirements */}

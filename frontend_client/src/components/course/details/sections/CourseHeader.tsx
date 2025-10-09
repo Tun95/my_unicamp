@@ -20,8 +20,18 @@ const CourseHeader = ({ course }: CourseHeaderProps) => {
     );
   };
 
+  // Helper function
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max max-480px:p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex-1">
           {/* Degree Badge */}
@@ -58,35 +68,27 @@ const CourseHeader = ({ course }: CourseHeaderProps) => {
         </div>
 
         {/* Tuition Preview */}
-        <div className="lg:text-right">
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Tuition Fee
-            </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(
-                course.tuition_fee.amount,
-                course.tuition_fee.currency
-              )}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-              {course.tuition_fee.period.replace("_", " ")}
-            </p>
+        {course.tuition_fee && (
+          <div className="lg:text-right">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Tuition Fee
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(
+                  course.tuition_fee.amount,
+                  course.tuition_fee.currency
+                )}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                {course.tuition_fee.period.replace("_", " ")}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
-};
-
-// Helper function
-const formatCurrency = (amount: number, currency: string) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
 };
 
 export default CourseHeader;

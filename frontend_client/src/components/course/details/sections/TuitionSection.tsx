@@ -2,7 +2,7 @@ import { DollarSign, AlertCircle } from "lucide-react";
 import { TuitionFee } from "../../../../types/course/course";
 
 interface TuitionSectionProps {
-  tuitionFee: TuitionFee;
+  tuitionFee?: TuitionFee;
 }
 
 const TuitionSection = ({ tuitionFee }: TuitionSectionProps) => {
@@ -14,6 +14,20 @@ const TuitionSection = ({ tuitionFee }: TuitionSectionProps) => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  if (!tuitionFee) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8 max-480px:p-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <DollarSign size={24} className="text-green-600" />
+          Tuition & Fees
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Tuition information not available for this course.
+        </p>
+      </div>
+    );
+  }
 
   const getFeeDescription = () => {
     const amount = formatCurrency(tuitionFee.amount, tuitionFee.currency);

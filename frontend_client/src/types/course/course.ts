@@ -23,25 +23,28 @@ export interface Course {
   intake_months: string[];
   application_deadline?: string;
   language: string;
-  tuition_fee?: {
-    amount: number;
-    currency: string;
-    period: "per_year" | "per_semester" | "total_course";
-  };
-  entry_requirements?: {
-    minimum_gpa?: number;
-    language_tests?: Array<{
-      test_type: string;
-      minimum_score: string;
-    }>;
-    prerequisites?: string[];
-  };
+  tuition_fee?: TuitionFee;
+  entry_requirements?: EntryRequirements;
   website_url?: string;
   contact_email?: string;
   is_featured: boolean;
   is_active: boolean;
   createdAt: string;
   updatedAt: string;
+}
+export interface TuitionFee {
+  amount: number;
+  currency: string;
+  period: "per_year" | "per_semester" | "total_course";
+}
+
+export interface EntryRequirements {
+  minimum_gpa?: number;
+  language_tests?: Array<{
+    test_type: string;
+    minimum_score: string;
+  }>;
+  prerequisites?: string[];
 }
 
 export interface DegreeTypeData {
