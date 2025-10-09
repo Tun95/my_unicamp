@@ -137,11 +137,3 @@ export interface ApiError {
   status?: number;
   code?: string;
 }
-
-export interface ToggleFeaturedRequest {
-  is_featured: boolean;
-}
-
-export interface ToggleVisibilityRequest {
-  action?: "hide" | "unhide";
-}
