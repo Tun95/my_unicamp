@@ -4,7 +4,6 @@ import HeroSection from "./sections/HeroSection";
 import FilterBox from "./sections/FilterBox";
 import FeaturedCourses from "./sections/FeaturedCourses";
 import StatsSection from "./sections/StatsSection";
-import { dummyCourses } from "../../data/dummyCourses";
 import CourseCard from "../../common/course card/CourseCard";
 import { Course, FilterOptions } from "../../types/course/course";
 import { courseService } from "../../services/courseService";
@@ -61,8 +60,6 @@ const Home = () => {
         setCourses(response.data);
       } catch (error) {
         console.error("Failed to fetch courses:", error);
-        // Fallback to dummy data if API fails
-        setCourses(dummyCourses.slice(0, 6));
       } finally {
         setLoading(false);
       }
@@ -75,10 +72,6 @@ const Home = () => {
         setFeaturedCourses(featured);
       } catch (error) {
         console.error("Failed to fetch featured courses:", error);
-        // Fallback to dummy data if API fails
-        setFeaturedCourses(
-          dummyCourses.filter((course) => course.is_featured).slice(0, 6)
-        );
       } finally {
         setFeaturedLoading(false);
       }
@@ -105,37 +98,6 @@ const Home = () => {
         setCourses(response.data);
       } catch (error) {
         console.error("Failed to fetch filtered courses:", error);
-        // Fallback to client-side filtering with dummy data
-        const filtered = dummyCourses.filter((course: Course) => {
-          const matchesSearch =
-            !filters.search ||
-            course.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-            course.university
-              .toLowerCase()
-              .includes(filters.search.toLowerCase()) ||
-            course.field_of_study
-              .toLowerCase()
-              .includes(filters.search.toLowerCase());
-
-          const matchesDegree =
-            !filters.degree_type || course.degree_type === filters.degree_type;
-          const matchesField =
-            !filters.field_of_study ||
-            course.field_of_study === filters.field_of_study;
-          const matchesCity =
-            !filters.city || course.location.city === filters.city;
-          const matchesDuration =
-            !filters.duration || course.duration === filters.duration;
-
-          return (
-            matchesSearch &&
-            matchesDegree &&
-            matchesField &&
-            matchesCity &&
-            matchesDuration
-          );
-        });
-        setCourses(filtered.slice(0, 6));
       } finally {
         setLoading(false);
       }

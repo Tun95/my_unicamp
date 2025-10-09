@@ -19,6 +19,7 @@ const server = express();
 const corsOptions = {
   origin: [
     "https://unicamp-three.vercel.app",
+    "https://my-unicamp.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
   ],

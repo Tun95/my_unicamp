@@ -319,7 +319,7 @@ const CoursesFilter = ({
           {/* Filter Drawer */}
           <div
             ref={mobileFiltersRef}
-            className="absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col"
+            className="max-900px:h-[100vh] absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - Fixed */}
