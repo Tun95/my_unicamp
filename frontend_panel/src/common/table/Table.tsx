@@ -5,6 +5,7 @@ import { Loader } from "lucide-react";
 import { Course } from "../../types/dashboard/dashboard";
 import CourseDetailSidebar from "../../components/dashboard/details/CourseDetails";
 import { getStatusColorClasses } from "../../utilities/status/status";
+import { formatTuitionFee } from "../../utilities/utils/Utils";
 
 interface TableComponentProps {
   courses: Course[];
@@ -108,7 +109,9 @@ function TableComponent({
                         {course.duration}
                       </td>
                       <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        {course.fees}
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {formatTuitionFee(course.tuition_fee)}
+                        </td>
                       </td>
                     </tr>
                   ))}
@@ -155,7 +158,7 @@ function TableComponent({
                     </p>
                     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                       <span>{course.duration}</span>
-                      <span>{course.fees}</span>
+                      <span>{formatTuitionFee(course.tuition_fee)}</span>
                     </div>
                   </div>
                 ))}

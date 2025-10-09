@@ -1,15 +1,14 @@
 // Course.tsx
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react"; // Add Plus import
+import { Plus } from "lucide-react";
 import FilterBox from "../../common/filters/FilterBox";
 import { useSearch, useTheme } from "../../custom hooks/Hooks";
 import { courseService } from "../../services/courseService";
-import { Course as CourseType } from "../../types/dashboard/dashboard";
 import {
-  CourseFilters,
-  CoursesResponse,
+  Course as CourseType,
   FilterOptions,
-} from "../../types/course/course";
+} from "../../types/dashboard/dashboard";
+import { CourseFilters, CoursesResponse } from "../../types/course/course";
 import TableComponent from "./table/CourseTable";
 import CreateCourseModal from "../../common/modal/CreateCourseModal";
 
@@ -18,7 +17,8 @@ interface FilterState {
   university: string;
   degree_type: string;
   field_of_study: string;
-  location: string;
+  country: string;
+  city: string;
   is_active: string;
 }
 
@@ -36,10 +36,11 @@ function Course() {
     university: "",
     degree_type: "",
     field_of_study: "",
-    location: "",
+    country: "",
+    city: "",
     is_active: "",
   });
-  const [showCreateCourse, setShowCreateCourse] = useState(false); // Add modal state
+  const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
     null
   );
@@ -70,7 +71,8 @@ function Course() {
       if (filters.degree_type) params.degree_type = filters.degree_type;
       if (filters.field_of_study)
         params.field_of_study = filters.field_of_study;
-      if (filters.location) params.location = filters.location;
+      if (filters.country) params.country = filters.country;
+      if (filters.city) params.city = filters.city;
       if (filters.is_active) {
         params.is_active = filters.is_active === "active";
       }
@@ -93,8 +95,8 @@ function Course() {
   // Fetch filter options
   const fetchFilterOptions = async (): Promise<void> => {
     try {
-      const response = await courseService.getFilterOptions();
-      setFilterOptions(response.data);
+      const options = await courseService.getFilterOptions();
+      setFilterOptions(options);
     } catch (err: unknown) {
       console.error("Error fetching filter options:", err);
     }
@@ -128,8 +130,12 @@ function Course() {
     setFilters((prev) => ({ ...prev, field_of_study: value }));
   };
 
-  const handleLocationChange = (value: string): void => {
-    setFilters((prev) => ({ ...prev, location: value }));
+  const handleCountryChange = (value: string): void => {
+    setFilters((prev) => ({ ...prev, country: value, city: "" })); // Reset city when country changes
+  };
+
+  const handleCityChange = (value: string): void => {
+    setFilters((prev) => ({ ...prev, city: value }));
   };
 
   const handleStatusChange = (value: string): void => {
@@ -160,7 +166,8 @@ function Course() {
       university: "",
       degree_type: "",
       field_of_study: "",
-      location: "",
+      country: "",
+      city: "",
       is_active: "",
     });
     setGlobalSearch("");
@@ -222,9 +229,11 @@ function Course() {
             onUniversityChange={handleUniversityChange}
             onDegreeTypeChange={handleDegreeTypeChange}
             onFieldOfStudyChange={handleFieldOfStudyChange}
-            onLocationChange={handleLocationChange}
+            onCountryChange={handleCountryChange}
+            onCityChange={handleCityChange}
             onStatusChange={handleStatusChange}
             onClearAllFilters={handleClearAllFilters}
+            filterOptions={filterOptions}
           />
 
           <TableComponent

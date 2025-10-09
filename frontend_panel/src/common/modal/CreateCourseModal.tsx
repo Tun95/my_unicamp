@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, Calendar, Globe, Mail } from "lucide-react";
 import { courseService } from "../../services/courseService";
-import { CreateCourseData } from "../../types/course/course";
-import { FilterOptions } from "../../types/course/course";
 import { toast } from "sonner";
 import { commonIntakeMonths } from "../../utilities/utils/Utils";
+import { FilterOptions } from "../../types/dashboard/dashboard";
+import { CreateCourseData } from "../../types/course/course";
 
 interface CreateCourseModalProps {
   isOpen: boolean;
@@ -25,12 +25,18 @@ function CreateCourseModal({
     title: "",
     university: "",
     duration: "",
-    location: "",
-    fees: "",
+    location: {
+      city: "",
+      country: "",
+      address: "",
+      state: "",
+      postal_code: "",
+    },
     description: "",
-    degree_type: "",
+    degree_type: "Bachelor",
     field_of_study: "",
     intake_months: ["September"],
+    application_deadline: "",
     language: "English",
     tuition_fee: {
       amount: 0,
@@ -42,6 +48,9 @@ function CreateCourseModal({
       language_tests: [],
       prerequisites: [],
     },
+    website_url: "",
+    contact_email: "",
+    is_featured: false,
   });
 
   const [newPrerequisite, setNewPrerequisite] = useState("");
@@ -57,12 +66,18 @@ function CreateCourseModal({
         title: "",
         university: "",
         duration: "",
-        location: "",
-        fees: "",
+        location: {
+          city: "",
+          country: "",
+          address: "",
+          state: "",
+          postal_code: "",
+        },
         description: "",
-        degree_type: "",
+        degree_type: "Bachelor",
         field_of_study: "",
         intake_months: ["September"],
+        application_deadline: "",
         language: "English",
         tuition_fee: {
           amount: 0,
@@ -74,6 +89,9 @@ function CreateCourseModal({
           language_tests: [],
           prerequisites: [],
         },
+        website_url: "",
+        contact_email: "",
+        is_featured: false,
       });
       setNewPrerequisite("");
       setNewLanguageTest({ test_type: "", minimum_score: "" });
@@ -153,6 +171,16 @@ function CreateCourseModal({
       }));
       setNewLanguageTest({ test_type: "", minimum_score: "" });
     }
+  };
+
+  const handleLocationChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: {
+        ...prev.location,
+        [field]: value,
+      },
+    }));
   };
 
   const handleRemoveLanguageTest = (index: number) => {
@@ -330,26 +358,96 @@ function CreateCourseModal({
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        City *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.location.city || ""}
+                        onChange={(e) =>
+                          handleLocationChange("city", e.target.value)
+                        }
+                        list="cities"
+                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Enter city"
+                      />
+                      <datalist id="cities">
+                        {filterOptions?.cities.map((city) => (
+                          <option key={city} value={city} />
+                        ))}
+                      </datalist>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Country *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.location.country || ""}
+                        onChange={(e) =>
+                          handleLocationChange("country", e.target.value)
+                        }
+                        list="countries"
+                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Enter country"
+                      />
+                      <datalist id="countries">
+                        {filterOptions?.countries.map((country) => (
+                          <option key={country} value={country} />
+                        ))}
+                      </datalist>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        State/Province
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.location.state || ""}
+                        onChange={(e) =>
+                          handleLocationChange("state", e.target.value)
+                        }
+                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="State or province (optional)"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Postal Code
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.location.postal_code || ""}
+                        onChange={(e) =>
+                          handleLocationChange("postal_code", e.target.value)
+                        }
+                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Postal code (optional)"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Location *
+                      Address
                     </label>
                     <input
                       type="text"
-                      required
-                      value={formData.location}
+                      value={formData.location.address || ""}
                       onChange={(e) =>
-                        handleInputChange("location", e.target.value)
+                        handleLocationChange("address", e.target.value)
                       }
-                      list="locations"
                       className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      placeholder="Type or select location"
+                      placeholder="Full address (optional)"
                     />
-                    <datalist id="locations">
-                      {filterOptions?.locations.map((location) => (
-                        <option key={location} value={location} />
-                      ))}
-                    </datalist>
                   </div>
                 </div>
               </div>
@@ -364,38 +462,20 @@ function CreateCourseModal({
                 </div>
 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Duration *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.duration}
-                        onChange={(e) =>
-                          handleInputChange("duration", e.target.value)
-                        }
-                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="e.g., 4 years"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Display Fees *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.fees}
-                        onChange={(e) =>
-                          handleInputChange("fees", e.target.value)
-                        }
-                        className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="e.g., $50,000 per year"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Duration *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.duration}
+                      onChange={(e) =>
+                        handleInputChange("duration", e.target.value)
+                      }
+                      className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="e.g., 4 years"
+                    />
                   </div>
 
                   <div>
@@ -628,7 +708,7 @@ function CreateCourseModal({
                         onChange={(e) => setNewPrerequisite(e.target.value)}
                         placeholder="Add prerequisite course or requirement"
                         className="flex-1 px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        onKeyPress={(e) =>
+                        onKeyDown={(e) =>
                           e.key === "Enter" &&
                           (e.preventDefault(), handleAddPrerequisite())
                         }
@@ -743,6 +823,7 @@ function CreateCourseModal({
                     onChange={(e) =>
                       handleInputChange("application_deadline", e.target.value)
                     }
+                    min={new Date().toISOString().split("T")[0]}
                     className="w-full px-4 h-9 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>

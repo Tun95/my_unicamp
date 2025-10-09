@@ -1,18 +1,19 @@
 // FilterBox.tsx
 import { useState, useEffect } from "react";
 import { useTheme } from "../../custom hooks/Hooks";
-import { courseService } from "../../services/courseService";
-import { FilterOptions } from "../../types/course/course";
 import { Loader } from "lucide-react";
+import { FilterOptions } from "../../types/dashboard/dashboard";
 
 interface FilterBoxProps {
   onSearchChange: (value: string) => void;
   onUniversityChange: (value: string) => void;
   onDegreeTypeChange: (value: string) => void;
   onFieldOfStudyChange: (value: string) => void;
-  onLocationChange: (value: string) => void;
+  onCountryChange: (value: string) => void;
+  onCityChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onClearAllFilters?: () => void;
+  filterOptions?: FilterOptions | null;
 }
 
 function FilterBox({
@@ -20,9 +21,11 @@ function FilterBox({
   onUniversityChange,
   onDegreeTypeChange,
   onFieldOfStudyChange,
-  onLocationChange,
+  onCountryChange,
+  onCityChange,
   onStatusChange,
   onClearAllFilters,
+  filterOptions,
 }: FilterBoxProps) {
   const { theme } = useTheme();
 
@@ -30,33 +33,21 @@ function FilterBox({
   const [universityValue, setUniversityValue] = useState("all");
   const [degreeTypeValue, setDegreeTypeValue] = useState("all");
   const [fieldOfStudyValue, setFieldOfStudyValue] = useState("all");
-  const [locationValue, setLocationValue] = useState("all");
+  const [countryValue, setCountryValue] = useState("all");
+  const [cityValue, setCityValue] = useState("all");
   const [statusValue, setStatusValue] = useState("all");
-  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!filterOptions);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchFilterOptions = async () => {
-      try {
-        setLoading(true);
-        const response = await courseService.getFilterOptions();
-        setFilterOptions(response.data);
-        setError(null);
-      } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch filter options";
-        setError(errorMessage);
-        console.error("Error fetching filter options:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFilterOptions();
-  }, []);
+  // Get cities filtered by selected country
+  const getFilteredCities = () => {
+    if (!filterOptions || countryValue === "all") {
+      return filterOptions?.cities || [];
+    }
+    // In a real app, you might want to filter cities by country
+    // For now, return all cities since we don't have city-country mapping
+    return filterOptions.cities;
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -84,10 +75,18 @@ function FilterBox({
     onFieldOfStudyChange(value === "all" ? "" : value);
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setLocationValue(value);
-    onLocationChange(value === "all" ? "" : value);
+    setCountryValue(value);
+    setCityValue("all"); // Reset city when country changes
+    onCountryChange(value === "all" ? "" : value);
+    onCityChange(""); // Clear city filter
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCityValue(value);
+    onCityChange(value === "all" ? "" : value);
   };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -101,16 +100,26 @@ function FilterBox({
     setUniversityValue("all");
     setDegreeTypeValue("all");
     setFieldOfStudyValue("all");
-    setLocationValue("all");
+    setCountryValue("all");
+    setCityValue("all");
     setStatusValue("all");
     onSearchChange("");
     onUniversityChange("");
     onDegreeTypeChange("");
     onFieldOfStudyChange("");
-    onLocationChange("");
+    onCountryChange("");
+    onCityChange("");
     onStatusChange("");
     onClearAllFilters?.();
   };
+
+  // If filterOptions are provided via props, we don't need to load them
+  useEffect(() => {
+    if (filterOptions) {
+      setLoading(false);
+      setError(null);
+    }
+  }, [filterOptions]);
 
   if (loading) {
     return (
@@ -221,20 +230,40 @@ function FilterBox({
           </select>
         </div>
 
-        {/* Location Filter */}
+        {/* Country Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Location
+            Country
           </label>
           <select
-            value={locationValue}
-            onChange={handleLocationChange}
+            value={countryValue}
+            onChange={handleCountryChange}
             className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
           >
-            <option value="all">All Locations</option>
-            {filterOptions?.locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
+            <option value="all">All Countries</option>
+            {filterOptions?.countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* City Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            City
+          </label>
+          <select
+            value={cityValue}
+            onChange={handleCityChange}
+            className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
+            disabled={!filterOptions?.cities.length}
+          >
+            <option value="all">All Cities</option>
+            {getFilteredCities().map((city) => (
+              <option key={city} value={city}>
+                {city}
               </option>
             ))}
           </select>

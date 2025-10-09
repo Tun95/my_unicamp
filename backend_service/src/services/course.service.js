@@ -1,6 +1,7 @@
 // backend_service/src/services/course.service.js - Course service implementation
 const Course = require("../../models/course.model");
 const logger = require("../../config/logger");
+const { ERROR_MESSAGES } = require("../constants/constants");
 
 class CourseService {
   // Get all courses with filtering and pagination

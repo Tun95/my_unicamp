@@ -47,3 +47,66 @@ export const commonIntakeMonths = [
   "November",
   "December",
 ];
+
+// Tuition Fee Formatting
+export interface FormatTuitionOptions {
+  includePeriod?: boolean;
+  fallbackText?: string;
+}
+
+export const formatTuitionFee = (
+  tuition_fee?: {
+    amount?: number;
+    currency?: string;
+    period?: string;
+  },
+  options: FormatTuitionOptions = {}
+): string => {
+  const { includePeriod = true, fallbackText = "Not specified" } = options;
+
+  if (!tuition_fee?.amount || !tuition_fee?.currency) {
+    return fallbackText;
+  }
+
+  const formattedAmount = tuition_fee.amount.toLocaleString();
+  const currencySymbol = getCurrencySymbol(tuition_fee.currency);
+
+  let periodSuffix = "";
+  if (includePeriod) {
+    switch (tuition_fee.period) {
+      case "per_year":
+        periodSuffix = " per year";
+        break;
+      case "per_semester":
+        periodSuffix = " per semester";
+        break;
+      case "total_course":
+        periodSuffix = " total";
+        break;
+      default:
+        periodSuffix = "";
+    }
+  }
+
+  return `${currencySymbol}${formattedAmount}${periodSuffix}`;
+};
+
+// Helper function for currency symbols
+const getCurrencySymbol = (currency: string): string => {
+  const symbols: { [key: string]: string } = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    CAD: "C$",
+    AUD: "A$",
+    CHF: "CHF",
+    CNY: "¥",
+    INR: "₹",
+    NGN: "₦",
+    ZAR: "R",
+    // Add more currencies as needed
+  };
+
+  return symbols[currency] || currency;
+};

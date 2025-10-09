@@ -1,13 +1,23 @@
+// src/types/course/course.ts
 import { Course } from "../dashboard/dashboard";
 
 export interface CreateCourseData {
   title: string;
   university: string;
   duration: string;
-  location: string;
-  fees: string;
+  location: {
+    address?: string;
+    city: string;
+    state?: string;
+    country: string;
+    postal_code?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   description: string;
-  degree_type: string;
+  degree_type: "Bachelor" | "Master" | "PhD" | "Diploma" | "Certificate";
   field_of_study: string;
   intake_months: string[];
   application_deadline?: string;
@@ -15,7 +25,7 @@ export interface CreateCourseData {
   tuition_fee?: {
     amount: number;
     currency: string;
-    period: string;
+    period: "per_year" | "per_semester" | "total_course";
   };
   entry_requirements?: {
     minimum_gpa?: number;
@@ -27,6 +37,7 @@ export interface CreateCourseData {
   };
   website_url?: string;
   contact_email?: string;
+  is_featured?: boolean;
 }
 
 export interface CourseFilters {
@@ -36,7 +47,8 @@ export interface CourseFilters {
   university?: string;
   degree_type?: string;
   field_of_study?: string;
-  location?: string;
+  country?: string;
+  city?: string;
   is_active?: boolean;
 }
 
@@ -58,13 +70,16 @@ export interface CoursesResponse {
   };
 }
 
-export interface FilterOptions {
-  universities: string[];
-  degree_types: string[];
-  fields_of_study: string[];
-  locations: string[];
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
 }
 
-export interface FilterOptionsResponse {
-  data: FilterOptions;
+export interface ToggleFeaturedRequest {
+  is_featured: boolean;
+}
+
+export interface ToggleVisibilityRequest {
+  action?: "hide" | "unhide";
 }

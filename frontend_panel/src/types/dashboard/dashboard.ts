@@ -1,29 +1,46 @@
 // src/types/dashboard/dashboard.ts
-
 export interface Course {
   _id: string;
   title: string;
+  slug: string;
   university: string;
   duration: string;
-  location: string;
-  fees: string;
+  location: {
+    address?: string;
+    city: string;
+    state?: string;
+    country: string;
+    postal_code?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   description: string;
-  degree_type: string;
+  degree_type: "Bachelor" | "Master" | "PhD" | "Diploma" | "Certificate";
   field_of_study: string;
   intake_months: string[];
+  application_deadline?: string;
   language: string;
-  is_active: boolean;
-  createdAt: string;
-  updatedAt: string;
   tuition_fee?: {
     amount: number;
     currency: string;
-    period: string;
+    period: "per_year" | "per_semester" | "total_course";
   };
   entry_requirements?: {
-    prerequisites: string[];
-    language_tests: string[];
+    minimum_gpa?: number;
+    language_tests?: Array<{
+      test_type: string;
+      minimum_score: string;
+    }>;
+    prerequisites?: string[];
   };
+  website_url?: string;
+  contact_email?: string;
+  is_featured: boolean;
+  is_active: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DegreeTypeData {
@@ -66,7 +83,17 @@ export interface DashboardOverview {
       percentage: number;
     }>;
     locations: Array<{
-      location: string;
+      location: {
+        address?: string;
+        city: string;
+        state?: string;
+        country: string;
+        postal_code?: string;
+        coordinates?: {
+          latitude: number;
+          longitude: number;
+        };
+      };
       count: number;
       university_count: number;
       avg_tuition: number;
@@ -90,38 +117,18 @@ export interface DashboardOverview {
   last_updated: string;
 }
 
-// src/types/course/course.ts
-export interface CourseFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  university?: string;
-  degree_type?: string;
-  field_of_study?: string;
-  location?: string;
-  is_active?: boolean;
-}
-
-export interface PaginationInfo {
-  total_pages: number;
-  current_page: number;
-  total: number;
-  limit: number;
-}
-
-export interface CoursesResponse {
-  data: Course[];
-  pagination: PaginationInfo;
-  filters?: {
-    field_of_study?: string;
-    university?: string;
-    degree_type?: string;
-    location?: string;
+export interface FilterOptions {
+  universities: string[];
+  degree_types: string[];
+  fields_of_study: string[];
+  countries: string[];
+  cities: string[];
+  tuition_range: {
+    minTuition: number;
+    maxTuition: number;
   };
 }
 
-export interface ApiError {
-  message: string;
-  status?: number;
-  code?: string;
+export interface FilterOptionsResponse {
+  data: FilterOptions;
 }

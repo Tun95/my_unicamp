@@ -55,7 +55,7 @@ function ChartComponent({ data }: ChartComponentProps) {
           margin={{
             top: 0,
             right: 0,
-            left: -36,
+            left: -20,
             bottom: 0,
           }}
         >
