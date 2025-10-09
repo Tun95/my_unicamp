@@ -5,12 +5,12 @@ const { STATUS, ERROR_MESSAGES } = require("../constants/constants");
 const logger = require("../../config/logger");
 
 class CourseController {
-  // Get all courses with advanced filtering (for courses page)
+  // Get all courses with advanced filtering (for courses page with load more)
   async getCourses(req, res) {
     try {
       const {
         page = 1,
-        limit = 12,
+        limit = 6,
         search,
         university,
         degree_type,
@@ -20,6 +20,7 @@ class CourseController {
         min_tuition,
         max_tuition,
         intake_month,
+        duration,
         is_featured,
         sort_by = "createdAt",
         sort_order = "desc",
@@ -37,6 +38,7 @@ class CourseController {
         min_tuition,
         max_tuition,
         intake_month,
+        duration,
         is_featured,
         sort_by,
         sort_order,
@@ -51,6 +53,61 @@ class CourseController {
       await logger.error(error, {
         controller: "CourseController",
         method: "getCourses",
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Get limited courses without pagination (max 6 courses)
+  async getLimitedCourses(req, res) {
+    try {
+      const {
+        search,
+        university,
+        degree_type,
+        field_of_study,
+        country,
+        city,
+        min_tuition,
+        max_tuition,
+        intake_month,
+        duration,
+        is_featured,
+        sort_by = "createdAt",
+        sort_order = "desc",
+        limit = 6,
+      } = req.query;
+
+      const result = await courseService.getLimitedCourses({
+        search,
+        university,
+        degree_type,
+        field_of_study,
+        country,
+        city,
+        min_tuition,
+        max_tuition,
+        intake_month,
+        duration,
+        is_featured,
+        sort_by,
+        sort_order,
+        limit: parseInt(limit),
+      });
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: result.courses,
+        count: result.count,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getLimitedCourses",
       });
 
       return sendResponse(res, 500, {

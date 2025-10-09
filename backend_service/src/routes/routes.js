@@ -12,6 +12,7 @@ const {
   toggleFeaturedValidation,
   getFeaturedCoursesValidation,
   getCourseBySlugValidation,
+  getLimitedCoursesValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -21,14 +22,26 @@ setupRoutes = (server) => {
     .get(getCoursesValidation, courseController.getCourses);
 
   server
-    .route("/api/admin/courses")
-    .post(createCourseValidation, courseController.createCourse);
+    .route("/api/courses/limited")
+    .get(getLimitedCoursesValidation, courseController.getLimitedCourses);
 
   server
     .route("/api/courses/featured")
     .get(getFeaturedCoursesValidation, courseController.getFeaturedCourses);
 
   server.route("/api/courses/filters").get(courseController.getFilterOptions);
+
+  server
+    .route("/api/courses/:id")
+    .get(idValidation, courseController.getCourseById);
+
+  server
+    .route("/api/courses/slug/:slug")
+    .get(getCourseBySlugValidation, courseController.getCourseBySlug);
+
+  server
+    .route("/api/admin/courses")
+    .post(createCourseValidation, courseController.createCourse);
 
   // Latest courses
   server
@@ -38,14 +51,6 @@ setupRoutes = (server) => {
   server
     .route("/api/admin/courses")
     .get(getAdminCoursesValidation, courseController.getAdminCourses);
-
-  server
-    .route("/api/courses/:id")
-    .get(idValidation, courseController.getCourseById);
-
-  server
-    .route("/api/courses/slug/:slug")
-    .get(getCourseBySlugValidation, courseController.getCourseBySlug);
 
   server
     .route("/api/admin/courses/:id")

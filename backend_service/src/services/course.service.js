@@ -4,10 +4,10 @@ const logger = require("../../config/logger");
 const { ERROR_MESSAGES } = require("../constants/constants");
 
 class CourseService {
-  // Get all courses with filtering and pagination
+  // Get all courses with filtering and pagination (for load more)
   async getCourses({
     page = 1,
-    limit = 10,
+    limit = 6,
     search,
     university,
     degree_type,
@@ -17,6 +17,7 @@ class CourseService {
     min_tuition,
     max_tuition,
     intake_month,
+    duration,
     is_featured,
     sort_by = "createdAt",
     sort_order = "desc",
@@ -74,6 +75,26 @@ class CourseService {
         query.intake_months = { $in: [intake_month] };
       }
 
+      // Filter by duration
+      if (duration) {
+        // Handle different duration formats (e.g., "1 year", "2 years", "3 years", "4 years", "6 months")
+        const durationPatterns = {
+          "1 year": /^1\s*year$/i,
+          "2 years": /^2\s*years?$/i,
+          "3 years": /^3\s*years?$/i,
+          "4 years": /^4\s*years?$/i,
+          "6 months": /^6\s*months?$/i,
+          "1.5 years": /^1\.5\s*years?$/i,
+        };
+
+        if (durationPatterns[duration]) {
+          query.duration = { $regex: durationPatterns[duration] };
+        } else {
+          // Fallback to exact match
+          query.duration = { $regex: duration, $options: "i" };
+        }
+      }
+
       // Filter by featured status
       if (is_featured !== undefined) {
         query.is_featured = is_featured === "true";
@@ -109,12 +130,130 @@ class CourseService {
           current_page: parseInt(page),
           total,
           limit: parseInt(limit),
+          has_more: page < Math.ceil(total / limit),
         },
       };
     } catch (error) {
       await logger.error(error, {
         service: "CourseService",
         method: "getCourses",
+      });
+      throw error;
+    }
+  }
+
+  // Get limited courses without pagination (max 6 courses)
+  async getLimitedCourses({
+    search,
+    university,
+    degree_type,
+    field_of_study,
+    country,
+    city,
+    min_tuition,
+    max_tuition,
+    intake_month,
+    duration,
+    is_featured,
+    sort_by = "createdAt",
+    sort_order = "desc",
+    limit = 6,
+  }) {
+    try {
+      let query = { is_active: true };
+
+      // Apply the same filters as getCourses
+      if (search) {
+        query.$or = [
+          { title: { $regex: search, $options: "i" } },
+          { university: { $regex: search, $options: "i" } },
+          { field_of_study: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { "location.city": { $regex: search, $options: "i" } },
+          { "location.country": { $regex: search, $options: "i" } },
+        ];
+      }
+
+      if (university) {
+        query.university = { $regex: university, $options: "i" };
+      }
+
+      if (degree_type) {
+        query.degree_type = degree_type;
+      }
+
+      if (field_of_study) {
+        query.field_of_study = { $regex: field_of_study, $options: "i" };
+      }
+
+      if (country) {
+        query["location.country"] = { $regex: country, $options: "i" };
+      }
+
+      if (city) {
+        query["location.city"] = { $regex: city, $options: "i" };
+      }
+
+      if (min_tuition || max_tuition) {
+        query["tuition_fee.amount"] = {};
+        if (min_tuition)
+          query["tuition_fee.amount"].$gte = parseInt(min_tuition);
+        if (max_tuition)
+          query["tuition_fee.amount"].$lte = parseInt(max_tuition);
+      }
+
+      if (intake_month) {
+        query.intake_months = { $in: [intake_month] };
+      }
+
+      // Filter by duration
+      if (duration) {
+        const durationPatterns = {
+          "1 year": /^1\s*year$/i,
+          "2 years": /^2\s*years?$/i,
+          "3 years": /^3\s*years?$/i,
+          "4 years": /^4\s*years?$/i,
+          "6 months": /^6\s*months?$/i,
+          "1.5 years": /^1\.5\s*years?$/i,
+        };
+
+        if (durationPatterns[duration]) {
+          query.duration = { $regex: durationPatterns[duration] };
+        } else {
+          query.duration = { $regex: duration, $options: "i" };
+        }
+      }
+
+      if (is_featured !== undefined) {
+        query.is_featured = is_featured === "true";
+      }
+
+      // Sort options
+      const sortOptions = {};
+      sortOptions[sort_by] = sort_order === "desc" ? -1 : 1;
+
+      const courses = await Course.find(query)
+        .select(
+          "-entry_requirements -contact_email -website_url -is_active -createdAt -updatedAt -__v"
+        )
+        .limit(limit)
+        .sort(sortOptions);
+
+      await logger.info("Limited courses retrieved successfully", {
+        service: "CourseService",
+        method: "getLimitedCourses",
+        count: courses.length,
+        limit,
+      });
+
+      return {
+        courses,
+        count: courses.length,
+      };
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getLimitedCourses",
       });
       throw error;
     }
@@ -151,6 +290,121 @@ class CourseService {
     }
   }
 
+  // Get course by slug
+  async getCourseBySlug(slug) {
+    try {
+      const course = await Course.findOne({ slug, is_active: true });
+
+      if (!course) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      await logger.info("Course retrieved successfully by slug", {
+        service: "CourseService",
+        method: "getCourseBySlug",
+        slug: slug,
+      });
+
+      return course;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getCourseBySlug",
+        slug: slug,
+      });
+      throw error;
+    }
+  }
+
+  // Get unique values for filters
+  async getFilterOptions() {
+    try {
+      const universities = await Course.distinct("university", {
+        is_active: true,
+      });
+      const degreeTypes = await Course.distinct("degree_type", {
+        is_active: true,
+      });
+      const fieldsOfStudy = await Course.distinct("field_of_study", {
+        is_active: true,
+      });
+      const countries = await Course.distinct("location.country", {
+        is_active: true,
+      });
+      const cities = await Course.distinct("location.city", {
+        is_active: true,
+      });
+      const durations = await Course.distinct("duration", {
+        is_active: true,
+      });
+
+      // Get tuition fee range
+      const tuitionRange = await Course.aggregate([
+        { $match: { is_active: true } },
+        {
+          $group: {
+            _id: null,
+            minTuition: { $min: "$tuition_fee.amount" },
+            maxTuition: { $max: "$tuition_fee.amount" },
+          },
+        },
+      ]);
+
+      return {
+        universities: universities.sort(),
+        degree_types: degreeTypes.sort(),
+        fields_of_study: fieldsOfStudy.sort(),
+        countries: countries.sort(),
+        cities: cities.sort(),
+        durations: this.cleanAndSortDurations(durations),
+        tuition_range: tuitionRange[0] || { minTuition: 0, maxTuition: 100000 },
+      };
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getFilterOptions",
+      });
+      throw error;
+    }
+  }
+
+  // Helper method to clean and sort duration values
+  cleanAndSortDurations(durations) {
+    // Remove duplicates and null/undefined values
+    const cleanDurations = durations.filter(
+      (duration) => duration && duration.trim() !== ""
+    );
+
+    // Sort durations in a logical order
+    return cleanDurations.sort((a, b) => {
+      // Extract numeric values from duration strings
+      const getDurationValue = (duration) => {
+        const match = duration.match(/(\d+\.?\d*)/);
+        return match ? parseFloat(match[1]) : 0;
+      };
+
+      // Extract unit (years/months) for priority
+      const getUnitPriority = (duration) => {
+        if (duration.toLowerCase().includes("year")) return 1;
+        if (duration.toLowerCase().includes("month")) return 2;
+        return 3; // other units
+      };
+
+      const aValue = getDurationValue(a);
+      const bValue = getDurationValue(b);
+      const aUnit = getUnitPriority(a);
+      const bUnit = getUnitPriority(b);
+
+      // First sort by unit (years before months)
+      if (aUnit !== bUnit) {
+        return aUnit - bUnit;
+      }
+
+      // Then sort by numeric value
+      return aValue - bValue;
+    });
+  }
+
   // Get latest courses (Public - only active)
   async getLatestCourses(limit = 5) {
     try {
@@ -174,32 +428,6 @@ class CourseService {
         service: "CourseService",
         method: "getLatestCourses",
         limit,
-      });
-      throw error;
-    }
-  }
-
-  // Get course by slug
-  async getCourseBySlug(slug) {
-    try {
-      const course = await Course.findOne({ slug, is_active: true });
-
-      if (!course) {
-        throw new Error("COURSE_NOT_FOUND");
-      }
-
-      await logger.info("Course retrieved successfully by slug", {
-        service: "CourseService",
-        method: "getCourseBySlug",
-        slug: slug,
-      });
-
-      return course;
-    } catch (error) {
-      await logger.error(error, {
-        service: "CourseService",
-        method: "getCourseBySlug",
-        slug: slug,
       });
       throw error;
     }
@@ -364,6 +592,9 @@ class CourseService {
       const cities = await Course.distinct("location.city", {
         is_active: true,
       });
+      const durations = await Course.distinct("duration", {
+        is_active: true,
+      });
 
       // Get tuition fee range
       const tuitionRange = await Course.aggregate([
@@ -383,6 +614,7 @@ class CourseService {
         fields_of_study: fieldsOfStudy.sort(),
         countries: countries.sort(),
         cities: cities.sort(),
+        durations: this.cleanAndSortDurations(durations),
         tuition_range: tuitionRange[0] || { minTuition: 0, maxTuition: 100000 },
       };
     } catch (error) {
@@ -392,6 +624,43 @@ class CourseService {
       });
       throw error;
     }
+  }
+
+  // Helper method to clean and sort duration values
+  cleanAndSortDurations(durations) {
+    // Remove duplicates and null/undefined values
+    const cleanDurations = durations.filter(
+      (duration) => duration && duration.trim() !== ""
+    );
+
+    // Sort durations in a logical order
+    return cleanDurations.sort((a, b) => {
+      // Extract numeric values from duration strings
+      const getDurationValue = (duration) => {
+        const match = duration.match(/(\d+\.?\d*)/);
+        return match ? parseFloat(match[1]) : 0;
+      };
+
+      // Extract unit (years/months) for priority
+      const getUnitPriority = (duration) => {
+        if (duration.toLowerCase().includes("year")) return 1;
+        if (duration.toLowerCase().includes("month")) return 2;
+        return 3; // other units
+      };
+
+      const aValue = getDurationValue(a);
+      const bValue = getDurationValue(b);
+      const aUnit = getUnitPriority(a);
+      const bUnit = getUnitPriority(b);
+
+      // First sort by unit (years before months)
+      if (aUnit !== bUnit) {
+        return aUnit - bUnit;
+      }
+
+      // Then sort by numeric value
+      return aValue - bValue;
+    });
   }
 
   // Create new course with duplicate check

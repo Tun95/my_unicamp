@@ -108,6 +108,13 @@ const getCoursesValidation = [
       "December",
     ])
     .withMessage("Invalid intake month"),
+  query("duration")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage("Duration filter too long")
+    .escape(),
   query("is_featured")
     .optional()
     .isBoolean()
@@ -131,6 +138,118 @@ const getCoursesValidation = [
     .trim()
     .isIn(["asc", "desc"])
     .withMessage("Sort order must be 'asc' or 'desc'"),
+  handleValidationErrors,
+];
+
+// Limited courses validation (same filters but no pagination)
+const getLimitedCoursesValidation = [
+  query("search")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Search query too long")
+    .escape(),
+  query("university")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("University filter too long")
+    .escape(),
+  query("degree_type")
+    .optional()
+    .isString()
+    .trim()
+    .isIn(["Bachelor", "Master", "PhD", "Diploma", "Certificate"])
+    .withMessage(
+      "Invalid degree type. Must be: Bachelor, Master, PhD, Diploma, or Certificate"
+    ),
+  query("field_of_study")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Field of study filter too long")
+    .escape(),
+  query("country")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Country filter too long")
+    .escape(),
+  query("city")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("City filter too long")
+    .escape(),
+  query("min_tuition")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Minimum tuition must be a positive number")
+    .toFloat(),
+  query("max_tuition")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Maximum tuition must be a positive number")
+    .toFloat(),
+  query("intake_month")
+    .optional()
+    .isString()
+    .trim()
+    .isIn([
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ])
+    .withMessage("Invalid intake month"),
+  query("duration")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage("Duration filter too long")
+    .escape(),
+  query("is_featured")
+    .optional()
+    .isBoolean()
+    .withMessage("is_featured must be a boolean")
+    .toBoolean(),
+  query("sort_by")
+    .optional()
+    .isString()
+    .trim()
+    .isIn([
+      "title",
+      "university",
+      "tuition_fee.amount",
+      "createdAt",
+      "updatedAt",
+    ])
+    .withMessage("Invalid sort field"),
+  query("sort_order")
+    .optional()
+    .isString()
+    .trim()
+    .isIn(["asc", "desc"])
+    .withMessage("Sort order must be 'asc' or 'desc'"),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 6 })
+    .withMessage("Limit must be between 1 and 6")
+    .toInt(),
   handleValidationErrors,
 ];
 
@@ -700,6 +819,7 @@ const getCourseBySlugValidation = [
 module.exports = {
   idValidation,
   getCoursesValidation,
+  getLimitedCoursesValidation,
 
   getAdminCoursesValidation,
 
