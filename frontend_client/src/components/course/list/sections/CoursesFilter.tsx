@@ -293,7 +293,7 @@ const CoursesFilter = ({
       </div>
 
       {/* Desktop Filters - STICKY */}
-      <div className="hidden lg:block sticky top-8 self-start">
+      <div className="hidden lg:block sticky top-24 self-start">
         {" "}
         {/* Added sticky and self-start */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
