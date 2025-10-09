@@ -1,6 +1,6 @@
 // FilterBox.tsx
 import { useState } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, X, ChevronDown } from "lucide-react";
 import { FilterOptions } from "../../../types/course/course";
 
 interface FilterBoxProps {
@@ -100,6 +100,12 @@ const FilterBox = ({
         >
           <Filter size={20} />
           Filters
+          <ChevronDown
+            size={16}
+            className={`transition-transform duration-200 ${
+              isOpen ? "rotate-180" : "rotate-0"
+            }`}
+          />
           {hasActiveFilters && (
             <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
               {Object.values(filters).filter(Boolean).length +

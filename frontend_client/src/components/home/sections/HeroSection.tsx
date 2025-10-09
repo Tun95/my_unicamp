@@ -23,7 +23,6 @@ const HeroSection = ({ onSearch, searchTerm }: HeroSectionProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocalSearchTerm(value);
-    // Optional: Implement debounced search here for real-time filtering
   };
 
   return (
