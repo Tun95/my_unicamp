@@ -292,22 +292,26 @@ const CoursesFilter = ({
         </button>
       </div>
 
-      {/* Desktop Filters */}
-      <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Filters
-          </h2>
-          {activeFiltersCount > 0 && (
-            <button
-              onClick={onClearAll}
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              Clear all
-            </button>
-          )}
+      {/* Desktop Filters - STICKY */}
+      <div className="hidden lg:block sticky top-8 self-start">
+        {" "}
+        {/* Added sticky and self-start */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Filters
+            </h2>
+            {activeFiltersCount > 0 && (
+              <button
+                onClick={onClearAll}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+          <FilterContent />
         </div>
-        <FilterContent />
       </div>
 
       {/* Mobile Filters Overlay */}
