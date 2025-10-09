@@ -328,7 +328,7 @@ const CoursesFilter = ({
           >
             {/* Header - Fixed */}
             <div className="flex-shrink-0">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 h-16 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Filters
