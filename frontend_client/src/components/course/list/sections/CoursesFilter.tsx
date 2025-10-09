@@ -16,7 +16,6 @@ const CoursesFilter = ({
   filters,
   onFilterChange,
   onClearAll,
-  hasActiveFilters,
   filterOptions,
   loading = false,
 }: CoursesFilterProps) => {
@@ -88,11 +87,34 @@ const CoursesFilter = ({
   };
 
   const getActiveFiltersCount = () => {
-    return (
-      Object.values(filters).filter(
-        (value) => value !== "" && value !== undefined && value !== null
-      ).length - 2
-    ); // Subtract page and limit
+    // Define which filters we want to count (exclude pagination and sorting)
+    const filtersToCount: (keyof CourseFilters)[] = [
+      "search",
+      "degree_type",
+      "field_of_study",
+      "city",
+      "duration",
+      "intake_month",
+      "min_tuition",
+      "max_tuition",
+    ];
+
+    return filtersToCount.filter((key) => {
+      const value = filters[key];
+
+      // Check if the filter has a meaningful value
+      if (value === undefined || value === null) return false;
+
+      if (typeof value === "string") {
+        return value.trim() !== "";
+      }
+
+      if (typeof value === "number") {
+        return true; // Numbers are always considered active
+      }
+
+      return false;
+    }).length;
   };
 
   const FilterSection = ({
@@ -122,7 +144,7 @@ const CoursesFilter = ({
               type="radio"
               name="degree_type"
               value=""
-              checked={filters.degree_type === ""}
+              checked={!filters.degree_type || filters.degree_type === ""}
               onChange={(e) =>
                 handleFilterChange("degree_type", e.target.value)
               }
@@ -250,6 +272,8 @@ const CoursesFilter = ({
     );
   }
 
+  const activeFiltersCount = getActiveFiltersCount();
+
   return (
     <>
       {/* Mobile Filter Button */}
@@ -260,9 +284,9 @@ const CoursesFilter = ({
         >
           <Filter size={20} />
           Filters
-          {hasActiveFilters && (
+          {activeFiltersCount > 0 && (
             <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {getActiveFiltersCount()}
+              {activeFiltersCount}
             </span>
           )}
         </button>
@@ -274,7 +298,7 @@ const CoursesFilter = ({
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Filters
           </h2>
-          {hasActiveFilters && (
+          {activeFiltersCount > 0 && (
             <button
               onClick={onClearAll}
               className="text-sm text-blue-600 hover:text-blue-700"
@@ -333,7 +357,7 @@ const CoursesFilter = ({
                   >
                     Show Results
                   </button>
-                  {hasActiveFilters && (
+                  {activeFiltersCount > 0 && (
                     <button
                       onClick={() => {
                         onClearAll();
