@@ -87,13 +87,13 @@ function TableComponent({
                       }`}
                       onClick={() => handleRowClick(course)}
                     >
-                      <td className="p-4 text-sm text-gray-900 dark:text-white">
+                      <td className="p-4 py-2 text-sm text-gray-900 dark:text-white">
                         {course.title}
                       </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                      <td className="p-4 py-2 text-sm text-gray-600 dark:text-gray-300">
                         {course.university}
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 py-2">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClasses(
                             course.degree_type
@@ -102,14 +102,14 @@ function TableComponent({
                           {course.degree_type}
                         </span>
                       </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                      <td className="p-4 py-2 text-sm text-gray-600 dark:text-gray-300">
                         {course.field_of_study}
                       </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                      <td className="p-4 py-2 text-sm text-gray-600 dark:text-gray-300">
                         {course.duration}
                       </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                      <td className="p-4 py-2 text-sm text-gray-600 dark:text-gray-300">
+                        <td className="p-4 py-2 text-sm text-gray-600 dark:text-gray-300">
                           {formatTuitionFee(course.tuition_fee)}
                         </td>
                       </td>
