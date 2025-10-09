@@ -11,7 +11,14 @@ class CourseService {
     university,
     degree_type,
     field_of_study,
-    location,
+    country,
+    city,
+    min_tuition,
+    max_tuition,
+    intake_month,
+    is_featured,
+    sort_by = "createdAt",
+    sort_order = "desc",
   }) {
     try {
       let query = { is_active: true };
@@ -23,6 +30,8 @@ class CourseService {
           { university: { $regex: search, $options: "i" } },
           { field_of_study: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
+          { "location.city": { $regex: search, $options: "i" } },
+          { "location.country": { $regex: search, $options: "i" } },
         ];
       }
 
@@ -42,9 +51,36 @@ class CourseService {
       }
 
       // Filter by location
-      if (location) {
-        query.location = { $regex: location, $options: "i" };
+      if (country) {
+        query["location.country"] = { $regex: country, $options: "i" };
       }
+
+      if (city) {
+        query["location.city"] = { $regex: city, $options: "i" };
+      }
+
+      // Filter by tuition fee range
+      if (min_tuition || max_tuition) {
+        query["tuition_fee.amount"] = {};
+        if (min_tuition)
+          query["tuition_fee.amount"].$gte = parseInt(min_tuition);
+        if (max_tuition)
+          query["tuition_fee.amount"].$lte = parseInt(max_tuition);
+      }
+
+      // Filter by intake month
+      if (intake_month) {
+        query.intake_months = { $in: [intake_month] };
+      }
+
+      // Filter by featured status
+      if (is_featured !== undefined) {
+        query.is_featured = is_featured === "true";
+      }
+
+      // Sort options
+      const sortOptions = {};
+      sortOptions[sort_by] = sort_order === "desc" ? -1 : 1;
 
       const courses = await Course.find(query)
         .select(
@@ -52,7 +88,7 @@ class CourseService {
         )
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .sort({ createdAt: -1 }); // Sort by creation date
+        .sort(sortOptions);
 
       const total = await Course.countDocuments(query);
 
@@ -83,6 +119,37 @@ class CourseService {
     }
   }
 
+  // Get featured courses for homepage
+  async getFeaturedCourses(limit = 6) {
+    try {
+      const courses = await Course.find({
+        is_active: true,
+        is_featured: true,
+      })
+        .select(
+          "-entry_requirements -contact_email -website_url -createdAt -updatedAt -__v"
+        )
+        .sort({ createdAt: -1 })
+        .limit(limit);
+
+      await logger.info("Featured courses retrieved successfully", {
+        service: "CourseService",
+        method: "getFeaturedCourses",
+        count: courses.length,
+        limit,
+      });
+
+      return courses;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getFeaturedCourses",
+        limit,
+      });
+      throw error;
+    }
+  }
+
   // Get latest courses (Public - only active)
   async getLatestCourses(limit = 5) {
     try {
@@ -90,7 +157,7 @@ class CourseService {
         .select(
           "-entry_requirements -contact_email -website_url -createdAt -updatedAt -__v"
         )
-        .sort({ createdAt: -1 }) // Latest first
+        .sort({ createdAt: -1 })
         .limit(limit);
 
       await logger.info("Latest courses retrieved successfully", {
@@ -111,6 +178,32 @@ class CourseService {
     }
   }
 
+  // Get course by slug
+  async getCourseBySlug(slug) {
+    try {
+      const course = await Course.findOne({ slug, is_active: true });
+
+      if (!course) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      await logger.info("Course retrieved successfully by slug", {
+        service: "CourseService",
+        method: "getCourseBySlug",
+        slug: slug,
+      });
+
+      return course;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getCourseBySlug",
+        slug: slug,
+      });
+      throw error;
+    }
+  }
+
   // Get all courses for admin (including inactive courses)
   async getAdminCourses({
     page = 1,
@@ -119,8 +212,10 @@ class CourseService {
     university,
     degree_type,
     field_of_study,
-    location,
+    country,
+    city,
     is_active,
+    is_featured,
   }) {
     try {
       let query = {};
@@ -130,6 +225,11 @@ class CourseService {
         query.is_active = is_active;
       }
 
+      // Filter by featured status if provided
+      if (is_featured !== undefined) {
+        query.is_featured = is_featured;
+      }
+
       // Search across multiple fields (including inactive)
       if (search) {
         query.$or = [
@@ -137,7 +237,8 @@ class CourseService {
           { university: { $regex: search, $options: "i" } },
           { field_of_study: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
-          { isbn: { $regex: search, $options: "i" } }, // Include additional fields for admin
+          { "location.city": { $regex: search, $options: "i" } },
+          { "location.country": { $regex: search, $options: "i" } },
         ];
       }
 
@@ -157,21 +258,26 @@ class CourseService {
       }
 
       // Filter by location
-      if (location) {
-        query.location = { $regex: location, $options: "i" };
+      if (country) {
+        query["location.country"] = { $regex: country, $options: "i" };
+      }
+
+      if (city) {
+        query["location.city"] = { $regex: city, $options: "i" };
       }
 
       const courses = await Course.find(query)
-        .select("-__v") // Include all fields for admin, only exclude version key
+        .select("-__v")
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .sort({ createdAt: -1 }); // Sort by creation date
+        .sort({ createdAt: -1 });
 
       const total = await Course.countDocuments(query);
 
       // Get statistics for admin
       const activeCount = await Course.countDocuments({ is_active: true });
       const inactiveCount = await Course.countDocuments({ is_active: false });
+      const featuredCount = await Course.countDocuments({ is_featured: true });
 
       await logger.info("Admin courses retrieved successfully", {
         service: "CourseService",
@@ -180,6 +286,7 @@ class CourseService {
         total,
         active_count: activeCount,
         inactive_count: inactiveCount,
+        featured_count: featuredCount,
         page,
         limit,
       });
@@ -196,6 +303,7 @@ class CourseService {
           total_courses: total,
           active_courses: activeCount,
           inactive_courses: inactiveCount,
+          featured_courses: featuredCount,
         },
       };
     } catch (error) {
@@ -249,13 +357,32 @@ class CourseService {
       const fieldsOfStudy = await Course.distinct("field_of_study", {
         is_active: true,
       });
-      const locations = await Course.distinct("location", { is_active: true });
+      const countries = await Course.distinct("location.country", {
+        is_active: true,
+      });
+      const cities = await Course.distinct("location.city", {
+        is_active: true,
+      });
+
+      // Get tuition fee range
+      const tuitionRange = await Course.aggregate([
+        { $match: { is_active: true } },
+        {
+          $group: {
+            _id: null,
+            minTuition: { $min: "$tuition_fee.amount" },
+            maxTuition: { $max: "$tuition_fee.amount" },
+          },
+        },
+      ]);
 
       return {
         universities: universities.sort(),
         degree_types: degreeTypes.sort(),
         fields_of_study: fieldsOfStudy.sort(),
-        locations: locations.sort(),
+        countries: countries.sort(),
+        cities: cities.sort(),
+        tuition_range: tuitionRange[0] || { minTuition: 0, maxTuition: 100000 },
       };
     } catch (error) {
       await logger.error(error, {
@@ -344,6 +471,38 @@ class CourseService {
         service: "CourseService",
         method: "updateCourse",
         course_id: courseId,
+      });
+      throw error;
+    }
+  }
+
+  // Toggle course featured status
+  async toggleFeaturedStatus(courseId, is_featured) {
+    try {
+      const course = await Course.findByIdAndUpdate(
+        courseId,
+        { is_featured },
+        { new: true, runValidators: true }
+      );
+
+      if (!course) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      await logger.info("Course featured status updated", {
+        service: "CourseService",
+        method: "toggleFeaturedStatus",
+        course_id: courseId,
+        is_featured: is_featured,
+      });
+
+      return course;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "toggleFeaturedStatus",
+        course_id: courseId,
+        is_featured: is_featured,
       });
       throw error;
     }

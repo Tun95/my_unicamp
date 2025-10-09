@@ -1,5 +1,6 @@
 // backend_service/models/course.model.js
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const courseSchema = new mongoose.Schema(
   {
@@ -7,6 +8,11 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      lowercase: true,
     },
     university: {
       type: String,
@@ -19,14 +25,32 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
     location: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    fees: {
-      type: String,
-      required: true,
-      trim: true,
+      address: {
+        type: String,
+        trim: true,
+      },
+      city: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      state: {
+        type: String,
+        trim: true,
+      },
+      country: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      postal_code: {
+        type: String,
+        trim: true,
+      },
+      coordinates: {
+        latitude: Number,
+        longitude: Number,
+      },
     },
     description: {
       type: String,
@@ -99,6 +123,10 @@ const courseSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    is_featured: {
+      type: Boolean,
+      default: false,
+    },
     is_active: {
       type: Boolean,
       default: true,
@@ -108,6 +136,21 @@ const courseSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Generate slug before saving
+courseSchema.pre("save", function (next) {
+  if (this.isModified("title") || !this.slug) {
+    const baseSlug = slugify(this.title, { lower: true, strict: true });
+    const universitySlug = slugify(this.university, {
+      lower: true,
+      strict: true,
+    });
+    this.slug = `${baseSlug}-${universitySlug}-${Date.now()
+      .toString()
+      .slice(-6)}`;
+  }
+  next();
+});
 
 // Compound unique index to prevent duplicates
 courseSchema.index(
@@ -127,12 +170,18 @@ courseSchema.index({
   title: "text",
   university: "text",
   field_of_study: "text",
+  "location.city": "text",
+  "location.country": "text",
 });
+
+// Indexes for better query performance
 courseSchema.index({ university: 1 });
 courseSchema.index({ degree_type: 1 });
 courseSchema.index({ field_of_study: 1 });
-courseSchema.index({ location: 1 });
+courseSchema.index({ "location.country": 1 });
+courseSchema.index({ "location.city": 1 });
 courseSchema.index({ is_active: 1 });
+courseSchema.index({ is_featured: 1 });
 
 const Course = mongoose.model("Course", courseSchema);
 module.exports = Course;

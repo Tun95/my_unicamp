@@ -5,17 +5,24 @@ const { STATUS, ERROR_MESSAGES } = require("../constants/constants");
 const logger = require("../../config/logger");
 
 class CourseController {
-  // Get all courses with filtering
+  // Get all courses with advanced filtering (for courses page)
   async getCourses(req, res) {
     try {
       const {
         page = 1,
-        limit = 10,
+        limit = 12,
         search,
         university,
         degree_type,
         field_of_study,
-        location,
+        country,
+        city,
+        min_tuition,
+        max_tuition,
+        intake_month,
+        is_featured,
+        sort_by = "createdAt",
+        sort_order = "desc",
       } = req.query;
 
       const result = await courseService.getCourses({
@@ -25,7 +32,14 @@ class CourseController {
         university,
         degree_type,
         field_of_study,
-        location,
+        country,
+        city,
+        min_tuition,
+        max_tuition,
+        intake_month,
+        is_featured,
+        sort_by,
+        sort_order,
       });
 
       return sendResponse(res, 200, {
@@ -38,6 +52,66 @@ class CourseController {
         controller: "CourseController",
         method: "getCourses",
       });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Get featured courses for homepage
+  async getFeaturedCourses(req, res) {
+    try {
+      const { limit = 6 } = req.query;
+
+      const courses = await courseService.getFeaturedCourses(parseInt(limit));
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: courses,
+        meta: {
+          count: courses.length,
+          limit: parseInt(limit),
+          description: "Featured courses for homepage",
+        },
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getFeaturedCourses",
+      });
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Get course by slug
+  async getCourseBySlug(req, res) {
+    try {
+      const { slug } = req.params;
+      const course = await courseService.getCourseBySlug(slug);
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: course,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getCourseBySlug",
+        slug: req.params.slug,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
 
       return sendResponse(res, 500, {
         status: STATUS.FAILED,
@@ -85,7 +159,9 @@ class CourseController {
         university,
         degree_type,
         field_of_study,
-        location,
+        country,
+        city,
+        is_featured,
         is_active,
       } = req.query;
 
@@ -96,7 +172,11 @@ class CourseController {
         university,
         degree_type,
         field_of_study,
-        location,
+        country,
+        city,
+        is_featured:
+          is_featured !== undefined ? is_featured === "true" : undefined,
+
         is_active: is_active !== undefined ? is_active === "true" : undefined,
       });
 
@@ -109,7 +189,8 @@ class CourseController {
           university,
           degree_type,
           field_of_study,
-          location,
+          location: { country, city },
+          is_featured,
           is_active,
         },
       });
@@ -236,6 +317,45 @@ class CourseController {
         controller: "CourseController",
         method: "updateCourse",
         course_id: req.params.id,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Toggle course featured status
+  async toggleFeaturedStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_featured } = req.body;
+
+      const course = await courseService.toggleFeaturedStatus(id, is_featured);
+
+      const message = is_featured
+        ? "Course marked as featured"
+        : "Course removed from featured";
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        message: message,
+        data: course,
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "toggleFeaturedStatus",
+        course_id: req.params.id,
+        is_featured: req.body?.is_featured,
       });
 
       if (error.message === "COURSE_NOT_FOUND") {

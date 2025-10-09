@@ -9,6 +9,9 @@ const {
   updateCourseValidation,
   toggleCourseVisibilityValidation,
   getAdminCoursesValidation,
+  toggleFeaturedValidation,
+  getFeaturedCoursesValidation,
+  getCourseBySlugValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -20,6 +23,10 @@ setupRoutes = (server) => {
   server
     .route("/api/admin/courses")
     .post(createCourseValidation, courseController.createCourse);
+
+  server
+    .route("/api/courses/featured")
+    .get(getFeaturedCoursesValidation, courseController.getFeaturedCourses);
 
   server.route("/api/courses/filters").get(courseController.getFilterOptions);
 
@@ -37,12 +44,24 @@ setupRoutes = (server) => {
     .get(idValidation, courseController.getCourseById);
 
   server
+    .route("/api/courses/slug/:slug")
+    .get(getCourseBySlugValidation, courseController.getCourseBySlug);
+
+  server
     .route("/api/admin/courses/:id")
     .put(idValidation, updateCourseValidation, courseController.updateCourse)
     .patch(
       idValidation,
       toggleCourseVisibilityValidation,
       courseController.toggleCourseVisibility
+    );
+
+  server
+    .route("/api/admin/courses/:id/featured")
+    .patch(
+      idValidation,
+      toggleFeaturedValidation,
+      courseController.toggleFeaturedStatus
     );
 
   server
