@@ -1,13 +1,15 @@
 import { Filter, X } from "lucide-react";
 import { useState, useRef } from "react";
-import { CourseFilters } from "../../../../types/course/course";
+import { CourseFilters, FilterOptions } from "../../../../types/course/course";
 import { useClickOutside } from "../../../../custom hooks/Hooks";
 
 interface CoursesFilterProps {
   filters: CourseFilters;
-  onFilterChange: (filters: CourseFilters) => void;
+  onFilterChange: (filters: Partial<CourseFilters>) => void;
   onClearAll: () => void;
   hasActiveFilters: boolean;
+  filterOptions: FilterOptions | null;
+  loading?: boolean;
 }
 
 const CoursesFilter = ({
@@ -15,6 +17,8 @@ const CoursesFilter = ({
   onFilterChange,
   onClearAll,
   hasActiveFilters,
+  filterOptions,
+  loading = false,
 }: CoursesFilterProps) => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const mobileFiltersRef = useRef<HTMLDivElement>(null);
@@ -26,101 +30,69 @@ const CoursesFilter = ({
     }
   });
 
-  const filterOptions = {
-    degree_type: [
-      { value: "", label: "All Degrees" },
-      { value: "Bachelor", label: "Bachelor" },
-      { value: "Master", label: "Master" },
-      { value: "PhD", label: "PhD" },
-      { value: "Diploma", label: "Diploma" },
-      { value: "Certificate", label: "Certificate" },
-    ],
-    field_of_study: [
-      { value: "", label: "All Fields" },
-      { value: "Computer Science", label: "Computer Science" },
-      { value: "Business Administration", label: "Business Administration" },
-      { value: "Mechanical Engineering", label: "Mechanical Engineering" },
-      { value: "Data Science", label: "Data Science" },
-      { value: "Psychology", label: "Psychology" },
-      { value: "Marketing", label: "Marketing" },
-      { value: "Medicine", label: "Medicine" },
-      { value: "Law", label: "Law" },
-    ],
-    location: [
-      { value: "", label: "All Locations" },
-      { value: "USA", label: "United States" },
-      { value: "Canada", label: "Canada" },
-      { value: "UK", label: "United Kingdom" },
-      { value: "Australia", label: "Australia" },
-      { value: "Germany", label: "Germany" },
-      { value: "Online", label: "Online" },
-    ],
-    duration: [
-      { value: "", label: "Any Duration" },
-      { value: "6 months", label: "6 months" },
-      { value: "1 year", label: "1 year" },
-      { value: "18 months", label: "18 months" },
-      { value: "2 years", label: "2 years" },
-      { value: "3 years", label: "3 years" },
-      { value: "4 years", label: "4 years" },
-      { value: "5+ years", label: "5+ years" },
-    ],
-    intake_month: [
-      { value: "", label: "Any Intake" },
-      { value: "January", label: "January" },
-      { value: "February", label: "February" },
-      { value: "March", label: "March" },
-      { value: "April", label: "April" },
-      { value: "May", label: "May" },
-      { value: "June", label: "June" },
-      { value: "July", label: "July" },
-      { value: "August", label: "August" },
-      { value: "September", label: "September" },
-      { value: "October", label: "October" },
-      { value: "November", label: "November" },
-      { value: "December", label: "December" },
-    ],
-  };
+  // Use dynamic options from API or fallback to defaults
+  const degreeTypes = filterOptions?.degree_types || [
+    "Bachelor",
+    "Master",
+    "PhD",
+    "Diploma",
+    "Certificate",
+  ];
+
+  const fieldsOfStudy = filterOptions?.fields_of_study || [];
+  const cities = filterOptions?.cities || [];
+  const durations = filterOptions?.durations || [];
+
+  const intakeMonths = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   const tuitionRanges = [
     { value: "", label: "Any Tuition" },
-    { value: "0-10000", label: "Under $10,000" },
-    { value: "10000-20000", label: "$10,000 - $20,000" },
-    { value: "20000-30000", label: "$20,000 - $30,000" },
-    { value: "30000-50000", label: "$30,000 - $50,000" },
-    { value: "50000-100000", label: "$50,000 - $100,000" },
-    { value: "100000", label: "Over $100,000" },
+    { value: "0-10000", label: "Under £10,000" },
+    { value: "10000-20000", label: "£10,000 - £20,000" },
+    { value: "20000-30000", label: "£20,000 - £30,000" },
+    { value: "30000-50000", label: "£30,000 - £50,000" },
+    { value: "50000-100000", label: "£50,000 - £100,000" },
+    { value: "100000", label: "Over £100,000" },
   ];
 
   const handleFilterChange = (key: keyof CourseFilters, value: string) => {
-    const newFilters = { ...filters };
-
-    if (key === "min_tuition" || key === "max_tuition") {
-      newFilters[key] = value;
-    } else {
-      newFilters[key] = value;
-    }
-
-    onFilterChange(newFilters);
+    onFilterChange({ [key]: value });
   };
 
   const handleTuitionRangeChange = (value: string) => {
-    const newFilters = { ...filters };
-
     if (value === "") {
-      newFilters.min_tuition = "";
-      newFilters.max_tuition = "";
+      onFilterChange({
+        min_tuition: undefined,
+        max_tuition: undefined,
+      });
     } else {
       const [min, max] = value.split("-");
-      newFilters.min_tuition = min;
-      newFilters.max_tuition = max || "";
+      onFilterChange({
+        min_tuition: min ? parseInt(min) : undefined,
+        max_tuition: max ? parseInt(max) : undefined,
+      });
     }
-
-    onFilterChange(newFilters);
   };
 
   const getActiveFiltersCount = () => {
-    return Object.values(filters).filter((value) => value !== "").length;
+    return (
+      Object.values(filters).filter(
+        (value) => value !== "" && value !== undefined && value !== null
+      ).length - 2
+    ); // Subtract page and limit
   };
 
   const FilterSection = ({
@@ -145,20 +117,35 @@ const CoursesFilter = ({
       {/* Degree Type */}
       <FilterSection title="Degree Type">
         <div className="space-y-2">
-          {filterOptions.degree_type.map((option) => (
-            <label key={option.value} className="flex items-center">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="degree_type"
+              value=""
+              checked={filters.degree_type === ""}
+              onChange={(e) =>
+                handleFilterChange("degree_type", e.target.value)
+              }
+              className="text-blue-600 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              All Degrees
+            </span>
+          </label>
+          {degreeTypes.map((type) => (
+            <label key={type} className="flex items-center">
               <input
                 type="radio"
                 name="degree_type"
-                value={option.value}
-                checked={filters.degree_type === option.value}
+                value={type}
+                checked={filters.degree_type === type}
                 onChange={(e) =>
                   handleFilterChange("degree_type", e.target.value)
                 }
                 className="text-blue-600 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                {option.label}
+                {type}
               </span>
             </label>
           ))}
@@ -168,28 +155,30 @@ const CoursesFilter = ({
       {/* Field of Study */}
       <FilterSection title="Field of Study">
         <select
-          value={filters.field_of_study}
+          value={filters.field_of_study || ""}
           onChange={(e) => handleFilterChange("field_of_study", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
         >
-          {filterOptions.field_of_study.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          <option value="">All Fields</option>
+          {fieldsOfStudy.map((field) => (
+            <option key={field} value={field}>
+              {field}
             </option>
           ))}
         </select>
       </FilterSection>
 
-      {/* Location */}
-      <FilterSection title="Location">
+      {/* City */}
+      <FilterSection title="City">
         <select
-          value={filters.location}
-          onChange={(e) => handleFilterChange("location", e.target.value)}
+          value={filters.city || ""}
+          onChange={(e) => handleFilterChange("city", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
         >
-          {filterOptions.location.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          <option value="">All Cities</option>
+          {cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
             </option>
           ))}
         </select>
@@ -198,13 +187,14 @@ const CoursesFilter = ({
       {/* Duration */}
       <FilterSection title="Duration">
         <select
-          value={filters.duration}
+          value={filters.duration || ""}
           onChange={(e) => handleFilterChange("duration", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
         >
-          {filterOptions.duration.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          <option value="">Any Duration</option>
+          {durations.map((duration) => (
+            <option key={duration} value={duration}>
+              {duration}
             </option>
           ))}
         </select>
@@ -213,13 +203,14 @@ const CoursesFilter = ({
       {/* Intake Month */}
       <FilterSection title="Intake Month">
         <select
-          value={filters.intake_month}
+          value={filters.intake_month || ""}
           onChange={(e) => handleFilterChange("intake_month", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
         >
-          {filterOptions.intake_month.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          <option value="">Any Intake</option>
+          {intakeMonths.map((month) => (
+            <option key={month} value={month}>
+              {month}
             </option>
           ))}
         </select>
@@ -228,7 +219,7 @@ const CoursesFilter = ({
       {/* Tuition Range */}
       <FilterSection title="Tuition Fee Range">
         <select
-          value={`${filters.min_tuition}-${filters.max_tuition}`}
+          value={`${filters.min_tuition || ""}-${filters.max_tuition || ""}`}
           onChange={(e) => handleTuitionRangeChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
         >
@@ -241,6 +232,23 @@ const CoursesFilter = ({
       </FilterSection>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="lg:w-80 flex-shrink-0">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i}>
+                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
