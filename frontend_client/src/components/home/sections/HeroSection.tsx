@@ -1,22 +1,28 @@
 // HeroSection.tsx
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface HeroSectionProps {
   onSearch: (searchTerm: string) => void;
+  searchTerm: string;
 }
 
-const HeroSection = ({ onSearch }: HeroSectionProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
+const HeroSection = ({ onSearch, searchTerm }: HeroSectionProps) => {
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+  // Sync local state with parent searchTerm
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchTerm);
+    onSearch(localSearchTerm);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSearchTerm(value);
+    setLocalSearchTerm(value);
     // Optional: Implement debounced search here for real-time filtering
   };
 
@@ -40,7 +46,7 @@ const HeroSection = ({ onSearch }: HeroSectionProps) => {
               />
               <input
                 type="text"
-                value={searchTerm}
+                value={localSearchTerm}
                 onChange={handleInputChange}
                 placeholder="Search for courses, universities, or fields of study..."
                 className="w-full pl-12 pr-4 py-4 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"

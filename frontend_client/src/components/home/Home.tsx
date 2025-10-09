@@ -155,10 +155,24 @@ const Home = () => {
     handleFilterChange({ search: searchTerm });
   };
 
+  // Function to clear all filters including search
+  const clearAllFilters = () => {
+    setFilters({
+      degree_type: "",
+      field_of_study: "",
+      city: "",
+      duration: "",
+      search: "",
+    });
+  };
+
+  // Check if there are any active filters (including search)
+  const hasActiveFilters = Object.values(filters).some((value) => value !== "");
+
   return (
     <div>
       {/* Hero Section with Search */}
-      <HeroSection onSearch={handleSearch} />
+      <HeroSection onSearch={handleSearch} searchTerm={filters.search} />
 
       {/* Main Content */}
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -168,6 +182,9 @@ const Home = () => {
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions}
             loading={optionsLoading}
+            searchTerm={filters.search}
+            onClearAll={clearAllFilters}
+            hasActiveFilters={hasActiveFilters}
           />
 
           {/* Results Count */}

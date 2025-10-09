@@ -7,12 +7,18 @@ interface FilterBoxProps {
   onFilterChange: (filters: Record<string, string>) => void;
   filterOptions: FilterOptions | null;
   loading?: boolean;
+  searchTerm: string;
+  onClearAll: () => void;
+  hasActiveFilters: boolean;
 }
 
 const FilterBox = ({
   onFilterChange,
   filterOptions,
   loading = false,
+  searchTerm,
+  onClearAll,
+  hasActiveFilters,
 }: FilterBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -62,18 +68,10 @@ const FilterBox = ({
     onFilterChange(newFilters);
   };
 
-  const clearFilters = () => {
-    const clearedFilters = {
-      degree_type: "",
-      field_of_study: "",
-      city: "",
-      duration: "",
-    };
-    setFilters(clearedFilters);
-    onFilterChange(clearedFilters);
+  // Clear individual search filter
+  const clearSearch = () => {
+    onFilterChange({ search: "" });
   };
-
-  const hasActiveFilters = Object.values(filters).some((value) => value !== "");
 
   if (loading) {
     return (
@@ -104,16 +102,17 @@ const FilterBox = ({
           Filters
           {hasActiveFilters && (
             <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {Object.values(filters).filter(Boolean).length}
+              {Object.values(filters).filter(Boolean).length +
+                (searchTerm ? 1 : 0)}
             </span>
           )}
         </button>
         {hasActiveFilters && (
           <button
-            onClick={clearFilters}
+            onClick={onClearAll}
             className="text-sm text-blue-600 hover:text-blue-700"
           >
-            Clear
+            Clear all
           </button>
         )}
       </div>
@@ -208,6 +207,18 @@ const FilterBox = ({
             <span className="text-sm text-gray-600 dark:text-gray-400">
               Active filters:
             </span>
+
+            {/* Search filter badge */}
+            {searchTerm && (
+              <span className="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-sm">
+                Search: "{searchTerm}"
+                <button onClick={clearSearch} className="hover:text-blue-600">
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+
+            {/* Dropdown filters badges */}
             {Object.entries(filters).map(
               ([key, value]) =>
                 value && (
@@ -225,8 +236,10 @@ const FilterBox = ({
                   </span>
                 )
             )}
+
+            {/* Clear all button */}
             <button
-              onClick={clearFilters}
+              onClick={onClearAll}
               className="text-sm text-blue-600 hover:text-blue-700 ml-2"
             >
               Clear all
