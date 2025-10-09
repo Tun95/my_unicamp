@@ -50,6 +50,12 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
     );
   };
 
+  // Helper function to render location safely
+  const renderLocation = (location: Course["location"]) => {
+    if (!location) return "Location not available";
+    return `${location.city}${location.country ? `, ${location.country}` : ""}`;
+  };
+
   if (variant === "list") {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -75,7 +81,9 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
                     {course.degree_type}
                   </span>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-                    {getFeeDisplay(course.tuition_fee)}
+                    {course.tuition_fee
+                      ? getFeeDisplay(course.tuition_fee)
+                      : "Fee not available"}
                   </div>
                 </div>
               </div>
@@ -92,13 +100,16 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={16} className="flex-shrink-0" />
-                  <span className="line-clamp-1">{course.location}</span>
+                  {/* ✅ FIXED: Render location properly */}
+                  <span className="line-clamp-1">
+                    {renderLocation(course.location)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={16} className="flex-shrink-0" />
                   <span className="line-clamp-1">{course.duration}</span>
                 </div>
-                {course.intake_months.length > 0 && (
+                {course.intake_months && course.intake_months.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Calendar size={16} className="flex-shrink-0" />
                     <span className="line-clamp-1">
@@ -168,7 +179,10 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
         {/* Location */}
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <MapPin size={16} className="flex-shrink-0" />
-          <span className="line-clamp-1">{course.location}</span>
+          {/* ✅ FIXED: Render location properly */}
+          <span className="line-clamp-1">
+            {renderLocation(course.location)}
+          </span>
         </div>
 
         {/* Duration */}
@@ -178,7 +192,7 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
         </div>
 
         {/* Intake Months */}
-        {course.intake_months.length > 0 && (
+        {course.intake_months && course.intake_months.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Calendar size={16} className="flex-shrink-0" />
             <span className="line-clamp-1">
@@ -194,7 +208,9 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
         <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700 mt-auto">
           <div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white line-clamp-1">
-              {getFeeDisplay(course.tuition_fee)}
+              {course.tuition_fee
+                ? getFeeDisplay(course.tuition_fee)
+                : "Fee not available"}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Tuition fee

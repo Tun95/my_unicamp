@@ -1,21 +1,36 @@
+// FilterBox.tsx
 import { useState } from "react";
 import { Filter, X } from "lucide-react";
+import { FilterOptions } from "../../../types/course/course";
 
 interface FilterBoxProps {
   onFilterChange: (filters: Record<string, string>) => void;
+  filterOptions: FilterOptions | null;
+  loading?: boolean;
 }
 
-const FilterBox = ({ onFilterChange }: FilterBoxProps) => {
+const FilterBox = ({
+  onFilterChange,
+  filterOptions,
+  loading = false,
+}: FilterBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState({
     degree_type: "",
     field_of_study: "",
-    location: "",
+    city: "",
     duration: "",
   });
 
-  const degreeTypes = ["Bachelor", "Master", "PhD", "Diploma", "Certificate"];
-  const fieldsOfStudy = [
+  // Use dynamic options from API or fallback to defaults
+  const degreeTypes = filterOptions?.degree_types || [
+    "Bachelor",
+    "Master",
+    "PhD",
+    "Diploma",
+    "Certificate",
+  ];
+  const fieldsOfStudy = filterOptions?.fields_of_study || [
     "Computer Science",
     "Business Administration",
     "Mechanical Engineering",
@@ -23,8 +38,15 @@ const FilterBox = ({ onFilterChange }: FilterBoxProps) => {
     "Psychology",
     "Marketing",
   ];
-  const locations = ["USA", "Canada", "UK", "Australia", "Germany", "Online"];
-  const durations = [
+  const cities = filterOptions?.cities || [
+    "London",
+    "Cambridge",
+    "Oxford",
+    "Manchester",
+    "Edinburgh",
+    "Bristol",
+  ];
+  const durations = filterOptions?.durations || [
     "6 months",
     "1 year",
     "18 months",
@@ -44,7 +66,7 @@ const FilterBox = ({ onFilterChange }: FilterBoxProps) => {
     const clearedFilters = {
       degree_type: "",
       field_of_study: "",
-      location: "",
+      city: "",
       duration: "",
     };
     setFilters(clearedFilters);
@@ -52,6 +74,23 @@ const FilterBox = ({ onFilterChange }: FilterBoxProps) => {
   };
 
   const hasActiveFilters = Object.values(filters).some((value) => value !== "");
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="animate-pulse">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i}>
+                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
@@ -124,20 +163,20 @@ const FilterBox = ({ onFilterChange }: FilterBoxProps) => {
             </select>
           </div>
 
-          {/* Location Filter */}
+          {/* City Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Location
+              City
             </label>
             <select
-              value={filters.location}
-              onChange={(e) => handleFilterChange("location", e.target.value)}
+              value={filters.city}
+              onChange={(e) => handleFilterChange("city", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              <option value="">All Locations</option>
-              {locations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
+              <option value="">All Cities</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
                 </option>
               ))}
             </select>
