@@ -816,6 +816,41 @@ const getCourseBySlugValidation = [
   handleValidationErrors,
 ];
 
+// Get related courses by ID validation
+const getRelatedCoursesValidation = [
+  param("id")
+    .notEmpty()
+    .withMessage("Course ID is required")
+    .isMongoId()
+    .withMessage("Course ID must be a valid MongoDB ObjectId"),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 10 })
+    .withMessage("Limit must be between 1 and 10")
+    .toInt(),
+  handleValidationErrors,
+];
+
+// Get related courses by slug validation
+const getRelatedCoursesBySlugValidation = [
+  param("slug")
+    .notEmpty()
+    .withMessage("Slug is required")
+    .isString()
+    .trim()
+    .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .withMessage(
+      "Slug can only contain lowercase letters, numbers, and hyphens"
+    )
+    .escape(),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 10 })
+    .withMessage("Limit must be between 1 and 10")
+    .toInt(),
+  handleValidationErrors,
+];
+
 module.exports = {
   idValidation,
   getCoursesValidation,
@@ -829,5 +864,8 @@ module.exports = {
   toggleFeaturedValidation,
   getFeaturedCoursesValidation,
   getCourseBySlugValidation,
+  getRelatedCoursesValidation,
+  getRelatedCoursesBySlugValidation,
+
   handleValidationErrors,
 };

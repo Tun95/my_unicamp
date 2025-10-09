@@ -177,6 +177,95 @@ class CourseController {
     }
   }
 
+  // Get related courses by course ID
+  async getRelatedCourses(req, res) {
+    try {
+      const { id } = req.params;
+      const { limit = 4 } = req.query;
+
+      const relatedCourses = await courseService.getRelatedCourses(
+        id,
+        parseInt(limit)
+      );
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: relatedCourses,
+        meta: {
+          count: relatedCourses.length,
+          limit: parseInt(limit),
+          description: "Related courses based on field of study",
+        },
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getRelatedCourses",
+        course_id: req.params.id,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      if (error.message === "COURSE_NOT_AVAILABLE") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_AVAILABLE,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  // Get related courses by course slug
+  async getRelatedCoursesBySlug(req, res) {
+    try {
+      const { slug } = req.params;
+      const { limit = 4 } = req.query;
+
+      const relatedCourses = await courseService.getRelatedCoursesBySlug(
+        slug,
+        parseInt(limit)
+      );
+
+      return sendResponse(res, 200, {
+        status: STATUS.SUCCESS,
+        data: relatedCourses,
+        meta: {
+          count: relatedCourses.length,
+          limit: parseInt(limit),
+          description: "Related courses based on field of study",
+        },
+      });
+    } catch (error) {
+      await logger.error(error, {
+        controller: "CourseController",
+        method: "getRelatedCoursesBySlug",
+        slug: req.params.slug,
+      });
+
+      if (error.message === "COURSE_NOT_FOUND") {
+        return sendResponse(res, 404, {
+          status: STATUS.FAILED,
+          message: ERROR_MESSAGES.COURSE_NOT_FOUND,
+        });
+      }
+
+      return sendResponse(res, 500, {
+        status: STATUS.FAILED,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
   // Get latest courses for admin (limited to 5)
   async getLatestCourses(req, res) {
     try {

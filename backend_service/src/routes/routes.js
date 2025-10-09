@@ -13,6 +13,8 @@ const {
   getFeaturedCoursesValidation,
   getCourseBySlugValidation,
   getLimitedCoursesValidation,
+  getRelatedCoursesValidation,
+  getRelatedCoursesBySlugValidation,
 } = require("../utils/validators");
 
 setupRoutes = (server) => {
@@ -38,6 +40,17 @@ setupRoutes = (server) => {
   server
     .route("/api/courses/slug/:slug")
     .get(getCourseBySlugValidation, courseController.getCourseBySlug);
+
+  server
+    .route("/api/courses/:id/related")
+    .get(getRelatedCoursesValidation, courseController.getRelatedCourses);
+
+  server
+    .route("/api/courses/slug/:slug/related")
+    .get(
+      getRelatedCoursesBySlugValidation,
+      courseController.getRelatedCoursesBySlug
+    );
 
   server
     .route("/api/admin/courses")

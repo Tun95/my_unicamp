@@ -316,6 +316,92 @@ class CourseService {
     }
   }
 
+  // Get related courses by field of study
+  async getRelatedCourses(courseId, limit = 4) {
+    try {
+      // Get the current course to extract field_of_study
+      const currentCourse = await Course.findById(courseId);
+
+      if (!currentCourse) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      if (!currentCourse.is_active) {
+        throw new Error("COURSE_NOT_AVAILABLE");
+      }
+
+      const relatedCourses = await Course.find({
+        _id: { $ne: courseId }, // Exclude the current course
+        field_of_study: { $regex: currentCourse.field_of_study, $options: "i" },
+        is_active: true,
+      })
+        .select(
+          "-entry_requirements -contact_email -website_url -is_active -createdAt -updatedAt -__v"
+        )
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+      await logger.info("Related courses retrieved successfully", {
+        service: "CourseService",
+        method: "getRelatedCourses",
+        course_id: courseId,
+        field_of_study: currentCourse.field_of_study,
+        count: relatedCourses.length,
+        limit,
+      });
+
+      return relatedCourses;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getRelatedCourses",
+        course_id: courseId,
+      });
+      throw error;
+    }
+  }
+
+  // Alternative method to get related courses by slug
+  async getRelatedCoursesBySlug(slug, limit = 4) {
+    try {
+      // Get the current course to extract field_of_study
+      const currentCourse = await Course.findOne({ slug, is_active: true });
+
+      if (!currentCourse) {
+        throw new Error("COURSE_NOT_FOUND");
+      }
+
+      const relatedCourses = await Course.find({
+        _id: { $ne: currentCourse._id }, // Exclude the current course
+        field_of_study: { $regex: currentCourse.field_of_study, $options: "i" },
+        is_active: true,
+      })
+        .select(
+          "-entry_requirements -contact_email -website_url -is_active -createdAt -updatedAt -__v"
+        )
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+      await logger.info("Related courses retrieved successfully by slug", {
+        service: "CourseService",
+        method: "getRelatedCoursesBySlug",
+        slug: slug,
+        field_of_study: currentCourse.field_of_study,
+        count: relatedCourses.length,
+        limit,
+      });
+
+      return relatedCourses;
+    } catch (error) {
+      await logger.error(error, {
+        service: "CourseService",
+        method: "getRelatedCoursesBySlug",
+        slug: slug,
+      });
+      throw error;
+    }
+  }
+
   // Get unique values for filters
   async getFilterOptions() {
     try {
