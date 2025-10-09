@@ -137,3 +137,17 @@ export interface ApiError {
   status?: number;
   code?: string;
 }
+
+export interface RelatedCoursesResponse {
+  status: string;
+  data: Course[];
+  meta: {
+    count: number;
+    limit: number;
+    description: string;
+  };
+}
+
+export interface RelatedCoursesParams {
+  limit?: number;
+}

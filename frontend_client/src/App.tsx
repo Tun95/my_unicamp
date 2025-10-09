@@ -39,7 +39,7 @@ function App() {
         <Route path="*" element={<ErrorBoundary />} />
         <Route path="/" element={<HomeScreen />} />
         <Route path="/courses" element={<CourseScreen />} />
-        <Route path="/courses/:id" element={<CourseDetailScreen />} />
+        <Route path="/courses/:slug" element={<CourseDetailScreen />} />
       </Routes>
       <Footer />
     </div>

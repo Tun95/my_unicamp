@@ -131,7 +131,7 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
                 )}
               </div>
               <Link
-                to={`/courses/${course._id}`}
+                to={`/courses/${course.slug || course._id }`}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 View Details
@@ -231,7 +231,7 @@ const CourseCard = ({ course, variant = "grid" }: CourseCardProps) => {
             )}
           </div>
           <Link
-            to={`/courses/${course._id}`}
+            to={`/courses/${course.slug || course._id}`}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0"
           >
             View Details
