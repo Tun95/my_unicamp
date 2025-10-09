@@ -39,7 +39,7 @@ const Courses = () => {
 
   const [filters, setFilters] = useState<CourseFilters>({
     page: 1,
-    limit: 12,
+    limit: 6,
     sort_by: "createdAt",
     sort_order: "desc",
   });
@@ -152,7 +152,7 @@ const Courses = () => {
   const clearAllFilters = () => {
     setFilters({
       page: 1,
-      limit: 12,
+      limit: 6,
       sort_by: "createdAt",
       sort_order: "desc",
     });
