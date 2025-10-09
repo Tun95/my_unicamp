@@ -29,6 +29,7 @@ const Courses = () => {
   );
   const [loading, setLoading] = useState(true);
   const [optionsLoading, setOptionsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [pagination, setPagination] = useState<LocalPaginationInfo>({
     current_page: 1,
     total_pages: 1,
@@ -39,10 +40,13 @@ const Courses = () => {
 
   const [filters, setFilters] = useState<CourseFilters>({
     page: 1,
-    limit: 6,
+    limit: 6, // Start with 6 items
     sort_by: "createdAt",
     sort_order: "desc",
   });
+
+  // Track accumulated limit for display
+  const [displayLimit, setDisplayLimit] = useState(6);
 
   // Fetch filter options on component mount
   useEffect(() => {
@@ -78,8 +82,8 @@ const Courses = () => {
 
         // Create a clean filters object that only includes filters with actual values
         const cleanFilters: CourseFilters = {
-          page: filters.page,
-          limit: filters.limit,
+          page: 1, // Always start from page 1 when filters change
+          limit: displayLimit, // Use the current display limit
           sort_by: filters.sort_by,
           sort_order: filters.sort_order,
         };
@@ -112,6 +116,8 @@ const Courses = () => {
 
         console.log("Sending filters to API:", cleanFilters);
         const response = await courseService.getCourses(cleanFilters);
+
+        // Always replace courses when filters change or initial load
         setCourses(response.data);
 
         const apiPagination = response.pagination;
@@ -130,18 +136,33 @@ const Courses = () => {
     };
 
     fetchCourses();
-  }, [filters]);
+  }, [
+    filters.search,
+    filters.degree_type,
+    filters.field_of_study,
+    filters.city,
+    filters.duration,
+    filters.intake_month,
+    filters.min_tuition,
+    filters.max_tuition,
+    filters.sort_by,
+    filters.sort_order,
+    displayLimit, // Add displayLimit as dependency
+  ]);
 
   const handleFilterChange = (newFilters: Partial<CourseFilters>) => {
+    // Reset display limit when filters change
+    setDisplayLimit(6);
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
-      page: 1, // Reset to first page when filters change
+      page: 1,
     }));
   };
 
   const handleSearch = (searchTerm: string) => {
-    // Only update search if it's not empty, or clear it if empty
+    // Reset display limit when search changes
+    setDisplayLimit(6);
     if (searchTerm.trim() !== "") {
       handleFilterChange({ search: searchTerm });
     } else {
@@ -150,6 +171,7 @@ const Courses = () => {
   };
 
   const clearAllFilters = () => {
+    setDisplayLimit(6);
     setFilters({
       page: 1,
       limit: 6,
@@ -158,12 +180,21 @@ const Courses = () => {
     });
   };
 
-  const loadMore = () => {
-    if (pagination.has_more) {
-      setFilters((prev) => ({
-        ...prev,
-        page: (prev.page || 1) + 1,
-      }));
+  const loadMore = async () => {
+    if (pagination.has_more && !loadingMore) {
+      try {
+        setLoadingMore(true);
+
+        // Increase the display limit by 6 (or whatever your initial limit is)
+        const newLimit = displayLimit + 6;
+        setDisplayLimit(newLimit);
+
+        console.log(`Loading more: increasing limit to ${newLimit}`);
+      } catch (error) {
+        console.error("Failed to load more courses:", error);
+      } finally {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -176,6 +207,9 @@ const Courses = () => {
     (filters.intake_month && filters.intake_month.trim() !== "") ||
     filters.min_tuition !== undefined ||
     filters.max_tuition !== undefined;
+
+  // Calculate displayed courses (show all courses up to displayLimit)
+  const displayedCourses = courses.slice(0, displayLimit);
 
   return (
     <div>
@@ -216,7 +250,7 @@ const Courses = () => {
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Showing{" "}
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {loading ? "..." : courses.length}
+                    {loading ? "..." : displayedCourses.length}
                   </span>{" "}
                   of{" "}
                   <span className="font-semibold text-gray-900 dark:text-white">
@@ -271,7 +305,7 @@ const Courses = () => {
               )}
 
               {/* Courses Grid/List - Only show when not loading and there are courses */}
-              {!loading && courses.length > 0 && (
+              {!loading && displayedCourses.length > 0 && (
                 <>
                   <div
                     className={
@@ -280,7 +314,7 @@ const Courses = () => {
                         : "space-y-6"
                     }
                   >
-                    {courses.map((course) => (
+                    {displayedCourses.map((course) => (
                       <CourseCard
                         key={course._id}
                         course={course}
@@ -290,22 +324,27 @@ const Courses = () => {
                   </div>
 
                   {/* Load More */}
-                  {pagination.has_more && (
-                    <div className="text-center mt-12">
-                      <button
-                        onClick={loadMore}
-                        disabled={loading}
-                        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? "Loading..." : "Load More Courses"}
-                      </button>
-                    </div>
-                  )}
+                  {pagination.has_more &&
+                    displayedCourses.length < pagination.total && (
+                      <div className="text-center mt-12">
+                        <button
+                          onClick={loadMore}
+                          disabled={loadingMore}
+                          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loadingMore ? "Loading..." : "Load More Courses"}
+                        </button>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                          Showing {displayedCourses.length} of{" "}
+                          {pagination.total} courses
+                        </p>
+                      </div>
+                    )}
                 </>
               )}
 
               {/* No Results State - Only show when not loading and no courses */}
-              {!loading && courses.length === 0 && (
+              {!loading && displayedCourses.length === 0 && (
                 <div className="text-center py-16">
                   <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
                     🔍
