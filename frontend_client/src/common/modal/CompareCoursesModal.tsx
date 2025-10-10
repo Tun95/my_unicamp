@@ -7,6 +7,7 @@ import CompareSidebar from "../../components/compare/sections/CompareSidebar";
 import EmptyComparison from "../../components/compare/sections/EmptyComparison";
 import CompareHeader from "../../components/compare/sections/CompareHeader";
 import ComparisonTable from "../../components/compare/sections/ComparisonTable";
+import { toast } from "sonner";
 
 interface CompareCoursesModalProps {
   isOpen: boolean;
@@ -56,7 +57,7 @@ const CompareCoursesModal = ({
 
   const addCourseToComparison = (course: Course) => {
     if (selectedCourses.length >= 4) {
-      alert("Maximum 4 courses can be compared at once");
+      toast.error("Maximum 4 courses can be compared at once");
       return;
     }
 
@@ -73,24 +74,24 @@ const CompareCoursesModal = ({
     setAvailableCourses((prev) => [...prev, courseToRemove]);
   };
 
-//   const clearAllCourses = () => {
-//     setSelectedCourses([]);
-//     // Reset available courses
-//     courseService
-//       .getCourses({ limit: 100, page: 1 })
-//       .then((response) => {
-//         setAvailableCourses(response.data);
-//       })
-//       .catch((err) => {
-//         console.error("Error resetting courses:", err);
-//       });
-//   };
+  //   const clearAllCourses = () => {
+  //     setSelectedCourses([]);
+  //     // Reset available courses
+  //     courseService
+  //       .getCourses({ limit: 100, page: 1 })
+  //       .then((response) => {
+  //         setAvailableCourses(response.data);
+  //       })
+  //       .catch((err) => {
+  //         console.error("Error resetting courses:", err);
+  //       });
+  //   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 w-full max-w-7xl h-[90vh] rounded-2xl shadow-xl flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-7xl h-[96vh] rounded-2xl shadow-xl flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>

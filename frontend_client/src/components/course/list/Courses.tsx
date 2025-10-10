@@ -11,6 +11,7 @@ import {
 } from "../../../types/course/course";
 import { courseService } from "../../../services/courseService";
 import CompareCoursesModal from "../../../common/modal/CompareCoursesModal";
+import { useNavigate } from "react-router-dom";
 
 type ViewMode = "grid" | "list";
 
@@ -23,6 +24,8 @@ interface LocalPaginationInfo {
 }
 
 const Courses = () => {
+  const navigate = useNavigate();
+
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [courses, setCourses] = useState<Course[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
@@ -214,6 +217,17 @@ const Courses = () => {
 
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
+  const handleCompareClick = () => {
+    const isMobile = window.innerWidth <= 900;
+
+    if (isMobile) {
+      // Navigate to compare page on mobile/tablet
+      navigate("/courses/compare");
+    } else {
+      // Open modal on desktop
+      setIsCompareModalOpen(true);
+    }
+  };
   return (
     <>
       <div>
@@ -274,7 +288,7 @@ const Courses = () => {
                   <div className="flex items-center gap-3">
                     {/* Compare Button */}
                     <button
-                      onClick={() => setIsCompareModalOpen(true)}
+                      onClick={handleCompareClick}
                       className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                       <svg

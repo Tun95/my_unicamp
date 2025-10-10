@@ -10,6 +10,7 @@ import HomeScreen from "./screens/homescreen/HomeScreen";
 import Footer from "./common/footer/Footer";
 import CourseDetailScreen from "./screens/coursescreen/CourseDetailScreen";
 import useScrollToTop from "./utilities/scroll to top/ScrollToTop";
+import CompareCourseScreen from "./screens/coursescreen/CompareCourseScreen";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,7 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/courses" element={<CourseScreen />} />
         <Route path="/courses/:slug" element={<CourseDetailScreen />} />
+        <Route path="/courses/compare" element={<CompareCourseScreen />} />
       </Routes>
       <Footer />
     </div>
