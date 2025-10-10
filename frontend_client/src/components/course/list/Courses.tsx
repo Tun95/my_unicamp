@@ -10,6 +10,7 @@ import {
   FilterOptions,
 } from "../../../types/course/course";
 import { courseService } from "../../../services/courseService";
+import CompareCoursesModal from "../../../common/modal/CompareCoursesModal";
 
 type ViewMode = "grid" | "list";
 
@@ -211,167 +212,197 @@ const Courses = () => {
   // Calculate displayed courses (show all courses up to displayLimit)
   const displayedCourses = courses.slice(0, displayLimit);
 
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
   return (
-    <div>
-      <Helmet>
-        <title>Courses | UNICAMP - Browse All Programs</title>
-        <meta
-          name="description"
-          content="Browse thousands of courses from top universities worldwide. Filter by degree type, location, duration, and more."
-        />
-      </Helmet>
+    <>
+      <div>
+        <Helmet>
+          <title>Courses | UNICAMP - Browse All Programs</title>
+          <meta
+            name="description"
+            content="Browse thousands of courses from top universities worldwide. Filter by degree type, location, duration, and more."
+          />
+        </Helmet>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Header */}
-        <CoursesHeader
-          searchTerm={filters.search || ""}
-          onSearchChange={handleSearch}
-          resultsCount={pagination.total}
-        />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          {/* Header */}
+          <CoursesHeader
+            searchTerm={filters.search || ""}
+            onSearchChange={handleSearch}
+            resultsCount={pagination.total}
+          />
 
-        <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-w-7xl ">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Filters */}
-            <div className="lg:w-80 flex-shrink-0">
-              <CoursesFilter
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onClearAll={clearAllFilters}
-                hasActiveFilters={hasActiveFilters}
-                filterOptions={filterOptions}
-                loading={optionsLoading}
-              />
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Toolbar */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Showing{" "}
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {loading ? "..." : displayedCourses.length}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {loading ? "..." : pagination.total}
-                  </span>{" "}
-                  courses
-                  {hasActiveFilters && (
-                    <button
-                      onClick={clearAllFilters}
-                      className="ml-2 text-blue-600 hover:text-blue-700 text-sm"
-                    >
-                      Clear all filters
-                    </button>
-                  )}
-                </div>
-
-                {/* View Mode Toggle */}
-                <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === "grid"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    }`}
-                    aria-label="Grid view"
-                  >
-                    <Grid size={20} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === "list"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    }`}
-                    aria-label="List view"
-                  >
-                    <List size={20} />
-                  </button>
-                </div>
+          <div className="container mx-auto px-8 max-900px:px-4 py-8 max-480px:px-2 max-w-7xl ">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Sidebar Filters */}
+              <div className="lg:w-80 flex-shrink-0">
+                <CoursesFilter
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onClearAll={clearAllFilters}
+                  hasActiveFilters={hasActiveFilters}
+                  filterOptions={filterOptions}
+                  loading={optionsLoading}
+                />
               </div>
 
-              {/* Loading State - Show whenever loading is true */}
-              {loading && (
-                <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-600 dark:text-gray-400 mt-4">
-                    Loading courses...
-                  </p>
-                </div>
-              )}
-
-              {/* Courses Grid/List - Only show when not loading and there are courses */}
-              {!loading && displayedCourses.length > 0 && (
-                <>
-                  <div
-                    className={
-                      viewMode === "grid"
-                        ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-                        : "space-y-6"
-                    }
-                  >
-                    {displayedCourses.map((course) => (
-                      <CourseCard
-                        key={course._id}
-                        course={course}
-                        variant={viewMode}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Load More */}
-                  {pagination.has_more &&
-                    displayedCourses.length < pagination.total && (
-                      <div className="text-center mt-12">
-                        <button
-                          onClick={loadMore}
-                          disabled={loadingMore}
-                          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {loadingMore ? "Loading..." : "Load More Courses"}
-                        </button>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Showing {displayedCourses.length} of{" "}
-                          {pagination.total} courses
-                        </p>
-                      </div>
+              {/* Main Content */}
+              <div className="flex-1">
+                {/* Toolbar */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Showing{" "}
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {loading ? "..." : displayedCourses.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {loading ? "..." : pagination.total}
+                    </span>{" "}
+                    courses
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="ml-2 text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        Clear all filters
+                      </button>
                     )}
-                </>
-              )}
-
-              {/* No Results State - Only show when not loading and no courses */}
-              {!loading && displayedCourses.length === 0 && (
-                <div className="text-center py-16">
-                  <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
-                    🔍
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    No courses found
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    {hasActiveFilters
-                      ? "Try adjusting your search terms or filters to see more results."
-                      : "No courses available at the moment."}
-                  </p>
-                  {hasActiveFilters && (
+
+                  <div className="flex items-center gap-3">
+                    {/* Compare Button */}
                     <button
-                      onClick={clearAllFilters}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                      onClick={() => setIsCompareModalOpen(true)}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
-                      Clear all filters
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                        />
+                      </svg>
+                      Compare Courses
                     </button>
-                  )}
+
+                    {/* View Mode Toggle */}
+                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1">
+                      <button
+                        onClick={() => setViewMode("grid")}
+                        className={`p-2 rounded-md transition-colors ${
+                          viewMode === "grid"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                        aria-label="Grid view"
+                      >
+                        <Grid size={20} />
+                      </button>
+                      <button
+                        onClick={() => setViewMode("list")}
+                        className={`p-2 rounded-md transition-colors ${
+                          viewMode === "list"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                        aria-label="List view"
+                      >
+                        <List size={20} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              )}
+                {/* Loading State - Show whenever loading is true */}
+                {loading && (
+                  <div className="text-center py-16">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-600 dark:text-gray-400 mt-4">
+                      Loading courses...
+                    </p>
+                  </div>
+                )}
+                {/* Courses Grid/List - Only show when not loading and there are courses */}
+                {!loading && displayedCourses.length > 0 && (
+                  <>
+                    <div
+                      className={
+                        viewMode === "grid"
+                          ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                          : "space-y-6"
+                      }
+                    >
+                      {displayedCourses.map((course) => (
+                        <CourseCard
+                          key={course._id}
+                          course={course}
+                          variant={viewMode}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Load More */}
+                    {pagination.has_more &&
+                      displayedCourses.length < pagination.total && (
+                        <div className="text-center mt-12">
+                          <button
+                            onClick={loadMore}
+                            disabled={loadingMore}
+                            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {loadingMore ? "Loading..." : "Load More Courses"}
+                          </button>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                            Showing {displayedCourses.length} of{" "}
+                            {pagination.total} courses
+                          </p>
+                        </div>
+                      )}
+                  </>
+                )}
+                {/* No Results State - Only show when not loading and no courses */}
+                {!loading && displayedCourses.length === 0 && (
+                  <div className="text-center py-16">
+                    <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
+                      🔍
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      No courses found
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {hasActiveFilters
+                        ? "Try adjusting your search terms or filters to see more results."
+                        : "No courses available at the moment."}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      {isCompareModalOpen && (
+        <CompareCoursesModal
+          isOpen={isCompareModalOpen}
+          onClose={() => setIsCompareModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
