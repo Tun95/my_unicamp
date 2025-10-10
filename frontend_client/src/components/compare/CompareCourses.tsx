@@ -8,6 +8,7 @@ import EmptyComparison from "./sections/EmptyComparison";
 import CompareHeader from "./sections/CompareHeader";
 import ComparisonTable from "./sections/ComparisonTable";
 import CompareSidebar from "./sections/CompareSidebar";
+import { toast } from "sonner";
 
 const CompareCourses = () => {
   const location = useLocation();
@@ -58,7 +59,7 @@ const CompareCourses = () => {
 
   const addCourseToComparison = (course: Course) => {
     if (selectedCourses.length >= 4) {
-      alert("Maximum 4 courses can be compared at once");
+      toast.error("Maximum 4 courses can be compared at once");
       return;
     }
 
