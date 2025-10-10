@@ -1,7 +1,7 @@
 const { HEALTH_STATUS } = require("../constants/constants");
 const aggregationController = require("../controllers/aggregation.controller");
 const courseController = require("../controllers/course.controller");
-const ukMScCoursesController = require("../controllers/uk-msc-courses.controller");
+const ukMScLiveController = require("../controllers/uk-msc-courses.controller");
 const {
   idValidation,
   getCoursesValidation,
@@ -91,24 +91,14 @@ setupRoutes = (server) => {
     .route("/api/admin/dashboard/overview")
     .get(aggregationController.getDashboardOverview);
 
-  // UK MSc Courses Routes
-  server
-    .route("/api/uk-msc/courses")
-    .get(ukMScCoursesController.getUKMScCourses);
+  // UK MSc LIVE DATA Routes (REPLACES the previous ones)
+  server.route("/api/uk-msc/courses").get(ukMScLiveController.getUKMScCourses);
 
   server
     .route("/api/uk-msc/universities")
-    .get(ukMScCoursesController.getUKUniversities);
+    .get(ukMScLiveController.getAvailableUniversities);
 
-  server
-    .route("/api/uk-msc/fields-of-study")
-    .get(ukMScCoursesController.getMScFieldsOfStudy);
-
-  server.route("/api/uk-msc/cities").get(ukMScCoursesController.getUKCities);
-
-  server
-    .route("/api/uk-msc/filters")
-    .get(ukMScCoursesController.getFilterOptions);
+  server.route("/api/uk-msc/health").get(ukMScLiveController.getServiceHealth);
 
   server.get("/health", async (req, res) => {
     res.status(200).json({ status: HEALTH_STATUS.UP });
