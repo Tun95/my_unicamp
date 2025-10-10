@@ -16,6 +16,22 @@ module.exports = {
   },
 
   providers: {
+    aiProviders: {
+      deepseek: {
+        apiKey: process.env.DEEPSEEK_API_KEY || "",
+        baseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
+      },
+      openai: {
+        apiKey: process.env.OPENAI_API_KEY || "",
+        baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+      },
+      brightdata: {
+        apiKey: process.env.BRIGHTDATA_API_KEY || "",
+        baseUrl:
+          process.env.BRIGHTDATA_BASE_URL || "https://api.brightdata.com",
+      },
+    },
+    
     email: {
       service: process.env.EMAIL_SERVICE || "gmail",
       host: process.env.EMAIL_HOST || "smtp.gmail.com",
@@ -25,5 +41,7 @@ module.exports = {
       password: process.env.EMAIL_PASSWORD || "your_email_password",
     },
   },
-  defaultProvider: {},
+  defaultProvider: {
+    ai: process.env.DEFAULT_AI_PROVIDER || "auto",
+  },
 };
