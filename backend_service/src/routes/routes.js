@@ -1,6 +1,7 @@
 const { HEALTH_STATUS } = require("../constants/constants");
 const aggregationController = require("../controllers/aggregation.controller");
 const courseController = require("../controllers/course.controller");
+const ukMScCoursesController = require("../controllers/uk-msc-courses.controller");
 const {
   idValidation,
   getCoursesValidation,
@@ -89,6 +90,25 @@ setupRoutes = (server) => {
   server
     .route("/api/admin/dashboard/overview")
     .get(aggregationController.getDashboardOverview);
+
+  // UK MSc Courses Routes
+  server
+    .route("/api/uk-msc/courses")
+    .get(ukMScCoursesController.getUKMScCourses);
+
+  server
+    .route("/api/uk-msc/universities")
+    .get(ukMScCoursesController.getUKUniversities);
+
+  server
+    .route("/api/uk-msc/fields-of-study")
+    .get(ukMScCoursesController.getMScFieldsOfStudy);
+
+  server.route("/api/uk-msc/cities").get(ukMScCoursesController.getUKCities);
+
+  server
+    .route("/api/uk-msc/filters")
+    .get(ukMScCoursesController.getFilterOptions);
 
   server.get("/health", async (req, res) => {
     res.status(200).json({ status: HEALTH_STATUS.UP });
